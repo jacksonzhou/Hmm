@@ -1,0 +1,37 @@
+<project name="Programning Languages Final Project" basedir="." default="all">
+  <property environment="env"/>
+
+  <fail message="Please set 'JAVACC_HOME' variable to point to JavaCC installation">
+    <condition>
+      <not>
+        <isset property="env.JAVACC_HOME"/>
+      </not>
+    </condition>
+  </fail>
+
+  <property name="src.dir"    value="src"/>
+  <property name="bin.dir"    value="bin"/>
+  
+  <target name="printJavaVersion">
+    <echo message="       YOU ARE USING JAVA ${java.version}"/>
+    <echo message=""/>
+    <echo message="  Java located at: ${java.home}"/>
+  </target>
+
+  <target name="all" depends="printJavaVersion">
+    <mkdir dir="${bin.dir}"/>
+    <javacc target="${src.dir}/proj/parser/Parser.jj" javacchome="${env.JAVACC_HOME}"/>
+    <javac srcdir="${src.dir}" destdir="${bin.dir}"/>
+  </target>
+
+
+  <target name="clean">
+    <delete dir="${bin.dir}"/>
+    <delete>
+      <fileset dir="${src.dir}/proj/parser">
+        <include name="*.java"/>
+      </fileset>
+    </delete>
+  </target>
+
+</project>
