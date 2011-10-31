@@ -1,0 +1,626 @@
+// modified by Melissa Olson, Tanmaya Godbole, and Sriratana Sutasirisap - Spring 2011
+
+options {
+STATIC = false ;
+}
+PARSER_BEGIN(Parser)
+package proj.parser;
+
+import java.io.*;
+import java.util.*;
+import static proj.AbstractSyntax.*;
+import proj.AbstractSyntax;
+
+public class Parser {
+
+    private Type   curTopLevelType;
+    private Token  curTopLevelToken;
+}
+
+PARSER_END(Parser)
+
+SKIP :
+{
+    " "
+  | "\t"
+  | "\n"
+  | "\r"
+  | <"//" (~["\n","\r"])* ("\n"|"\r")> 
+}
+
+TOKEN:
+{
+    < IF:    "if" >
+  | < IFF:   "iff" >
+  | < ELSE:  "else" >
+  | < WHILE: "while" >
+  | < FOR:   "for"   >
+
+  | < INT:   "int" >
+  | < FLOAT: "float" >
+  | < BOOL:  "bool" >
+  | < VOID:  "void" >
+  | < LIST:  "list" >
+  | < TUPLE: "tuple" >
+  | < OBJECT: "object" >
+  | < STRING: "string" >
+  
+  | < TRUE:  "true" >
+  | < FALSE: "false" >
+  | < RETURN:  "return" >
+
+  | < AND_OP:   "&&" >
+  | < OR_OP:    "||" >
+  | < LPAREN:   "(" >
+  | < RPAREN:   ")" >
+  | < LBRACE:   "[" >
+  | < RBRACE:   "]" >
+  | < LCURLY:   "{" >
+  | < RCURLY:   "}" >
+  | < SEMI:     ";" >
+  | < EQ_OP:    "==" >
+  | < NE_OP:    "!=" >
+  | < LE_OP:    "<=" >
+  | < GE_OP:    ">=" >
+  | < ELEM:     "<-" >
+  | < PIPE:     "|" >
+  | < EQUALS:   "=" >
+  | < LT_OP:    "<" >
+  | < GT_OP:    ">" >
+  | < MINUS:    "-" >
+  | < PLUS:     "+" >
+  | < MULT:     "*" >
+  | < DIV:      "/" >
+  | < PRCNT:    "%" >
+  | < BANG:     "!" >
+  | < COMMA:    "," >
+  | < SQUOTE:   "'" >
+  | < DOT:      "." >
+  | < LAMBDA:   "(\\">
+  | < MAP_TO:   "->">
+  | < MYCLASS:  "Class">
+  | < CREATE:   "create">
+  | < SIGN:     "#">
+  
+}
+
+TOKEN:  /* Literals */
+{
+    < INTEGER:    (["0"-"9"])+ >
+  | < IDENTIFIER: [ "A"-"Z", "a"-"z", "_"] // Maybe we could add the "_" check by the grammar...
+                  ( [ "A"-"Z", "a"-"z", "0"-"9", "_" ] )*
+    >
+  | < CLFLOAT:    (["0"-"9"])+ "." (["0"-"9"])* >
+  // Strings with NO Escaping:
+  | < CLSTRING:   ("\"" (~["\""])* "\"") >
+}
+
+TOKEN:
+{
+    <ERROR: ~[] >
+}
+
+// We are generously allowing the global variables to live.
+// Even though they deserve to DIE!
+
+Program Program() :
+{List<Declaration> globals = new ArrayList<Declaration>();
+ List<Declaration> decList;
+ List<Function> funcList = new ArrayList<Function>();
+ List<MyClass> classList = new ArrayList<MyClass>();
+ List<MyObject> objList = new ArrayList<MyObject>();
+ Function f; Token t; MyClass c; MyObject o;}
+{
+   (
+        (curTopLevelType = retType() curTopLevelToken = <IDENTIFIER>
+        (
+            decList = restOfGlobalDec() {globals.addAll(decList); } 
+            | f = restOfFunction()      { funcList.add(f); }
+        ))
+	|c = myClass() {classList.add(c);}
+        |o = obj() {objList.add(o);}
+        
+   )* 
+   {
+     return new Program(globals, funcList, classList, objList);
+   }
+}
+
+MyClass myClass() :
+{ Constructor cons; List<Declaration> globals = new ArrayList<Declaration>(); List<Declaration> decList; List<Function> funcList = new ArrayList<Function>();Token className; Function f;}
+{   
+    
+    <MYCLASS> className = <IDENTIFIER> <LCURLY>
+    
+    (curTopLevelType = retType() curTopLevelToken = <IDENTIFIER>
+    (
+            decList = restOfGlobalDec() {globals.addAll(decList); } 
+            | f = restOfFunction()      { funcList.add(f); }
+    ))* 
+    cons = constructor()
+    (curTopLevelType = retType() curTopLevelToken = <IDENTIFIER>
+    (
+            decList = restOfGlobalDec() {globals.addAll(decList); } 
+            | f = restOfFunction()      { funcList.add(f); }
+    ))* <RCURLY>
+   { 
+     
+     return new MyClass(className, globals, funcList, cons);
+   }
+}
+
+Constructor constructor() :
+{ Token consName; Declaration d; Block b; List<Declaration> args = new ArrayList<Declaration>();}
+{ consName = <IDENTIFIER> <LPAREN> 
+  [ d = parameter() {args.add(d);} (<COMMA> d = parameter() {args.add(d);})*]
+  <RPAREN> b = block()
+  {
+  return new Constructor(consName, args, b);
+  }
+}
+
+/*
+*  added by MST
+*  recognizes the syntax for instantiating an object of a class
+*/
+MyObject obj():
+{Token myObjName; Token className; List<Expression> args = new ArrayList<Expression>();}
+{
+  className = <IDENTIFIER> myObjName = <IDENTIFIER> <EQUALS> <CREATE> <IDENTIFIER> // need to ensure that the className = identifier after create
+  args = callArgs()
+  {
+    return new MyObject(myObjName, className, args);
+  }
+}
+
+/*
+* added by MST
+* recongizes the syntax for calling a method of a class, using an instance of a class
+*/
+ObjFunction objFunc():
+{Token className; Token myObjName; List<Expression> args = new ArrayList<Expression>(); Token objFunName;}
+{
+ className = <IDENTIFIER> <DOT> myObjName = <IDENTIFIER> <DOT> objFunName = <IDENTIFIER>
+ args = callArgs()
+ {
+   return new ObjFunction(className, myObjName, objFunName, args);
+ }
+}      
+
+Function restOfFunction() : 
+{ Declaration d; Block b; List<Declaration> args = new ArrayList<Declaration>(); }
+{
+	<LPAREN>
+	 [ d = parameter() {args.add(d);} (<COMMA> d = parameter() {args.add(d);})*]
+	<RPAREN> b = block()
+	{
+		return new Function(curTopLevelType, curTopLevelToken, args, b);
+	}
+}
+
+List<Declaration> restOfGlobalDec() :
+{Expression e, firstOne = null; Token id; List<Declaration> decls = new ArrayList<Declaration>();}
+{
+	(
+	   [ <EQUALS> firstOne = expression()]
+	   {
+		  decls.add(new Declaration(curTopLevelType, curTopLevelToken, firstOne));
+	   }
+    )
+	(<COMMA> id = <IDENTIFIER> 
+	   {e = null;}
+	   [ <EQUALS> e = expression() ]
+       {
+           decls.add(new Declaration(curTopLevelType, id, e));
+       }
+	)* <SEMI>
+	{
+		return decls;
+	}
+}
+	
+
+Declaration parameter() :
+{ Type t; Token id ; }
+{
+   t = varType() id = <IDENTIFIER> { return new Declaration(t, id, null); }
+}
+
+List<Declaration> declaration() :
+{ Type t; Declaration d; List<Declaration> result = new ArrayList<Declaration>();}
+{  
+   t = varType()
+   d = singleVarDeclaration(t) { result.add(d); }
+   ( <COMMA> d = singleVarDeclaration(t) {result.add(d); } )*
+   {
+       return result;
+   }
+}
+
+Declaration singleVarDeclaration(Type type) :
+{ Token id; Expression initValue = null;}
+{
+	id = <IDENTIFIER> [ <EQUALS> initValue = expression() ]
+	{
+		return new Declaration(type, id, initValue);
+	}
+}
+
+
+/**
+ * The return type is either a Variable type or 'void'
+ */
+Type retType() :
+{ Type t;}
+{ 
+	  <VOID>        { return BaseType.VOID; }
+	| t = varType() { return t; }
+}	
+
+/**
+ * A type that can be assigned to a variable.
+ */
+Type varType() :
+{Type t; List<Type> argTypes = new ArrayList<Type>();}
+{
+	  t = varBaseType() { return t; }
+	| LOOKAHEAD(3) <LPAREN> (LOOKAHEAD(2) t = varType() <COMMA> {argTypes.add(t);} )* t = retType() <RPAREN> {return new FunctionType(argTypes, t); } //type: tuple
+        | <LPAREN> (LOOKAHEAD(2) t = varType() <MAP_TO> {argTypes.add(t);} )* t = retType() <RPAREN> { return new FunctionType(argTypes, t, false); } //a new type syntax that describe first class functions
+}
+
+/**
+ * A Base Type, except for the 'void'
+ */
+Type varBaseType() :
+{}
+{
+    <INT>    { return BaseType.INT; }
+  | <FLOAT>  { return BaseType.FLOAT; }
+  | <BOOL>   { return BaseType.BOOL; }
+  | <LIST>   { return BaseType.LIST; }
+  | <TUPLE>  { return BaseType.TUPLE; }
+  | <OBJECT> { return BaseType.OBJECT; }
+  | <STRING> { return BaseType.STRING; }
+}
+
+List<Statement> statements() :
+{ Statement s; List<Statement> statements = new ArrayList<Statement>();}
+{
+    ( s = statement() {if (s != null) { statements.add(s);} } )* { return statements; }
+}
+
+Statement statement() :
+{ Statement s; List<Declaration> decls;}
+{  
+     <SEMI>                  { return null; }
+   | decls = declaration()   { return new DeclContainer(decls); }
+   | s = block()             { return s; }
+   | s = forEach()           { return s; }
+   | LOOKAHEAD(2) s = assignment()        { return s; }
+   | s = ifStatement()       { return s; }
+   | s = whileStatement()    { return s; }
+   /* TODO: Add the 'for' statement */
+   | LOOKAHEAD(2) s = callStatement()     { return s; }
+   | LOOKAHEAD(2) s = obj()		     { return s; }
+   | s = returnStatement()   { return s; }
+   | s = objFuncWithoutAssignment() {return s;} //added by MST - calling a method in a class
+
+}
+
+/*
+* added by MST
+* allows you to call a method in a class without assigning a return value to a variable 
+*/
+Expression objFuncWithoutAssignment() :
+{Expression e;}
+{
+  e = objFunc()
+  {return e;}
+}
+
+Block block() :
+{ List<Statement> ss;}
+{  
+   <LCURLY> ss = statements() <RCURLY> { return new Block(ss); }
+}
+
+Assignment assignment() :
+{ Token id ; LValue target;  Expression e;}
+{
+   id = <IDENTIFIER> ( 
+            <LBRACE> e = expression() <RBRACE> { target = new ListTupleReference(id, e);}
+           | { target = new Variable(id); }
+       ) <EQUALS>  e = expression() <SEMI> 
+      { return new Assignment(target, e);}
+}
+
+Conditional ifStatement() :
+{ Expression e; Statement sIf = null, sElse = null; Conditional c;}
+{  
+    <IF> <LPAREN> e = expression() <RPAREN> sIf = block() 
+    [ <ELSE> (sElse = ifStatement() | sElse = block()) ]
+    {
+      return new Conditional(e, sIf, sElse);
+    } 
+}
+
+ForEach forEach() :
+{ Expression e, listValue; Block b;}
+{
+	<FOR> <LPAREN> e = expression() <ELEM> listValue = expression() <RPAREN> b = block()
+    {
+    	Generator g = AbstractSyntax.constructGenerator(e, listValue);
+    	return new ForEach(g, b);
+    }
+}
+
+Loop whileStatement() :
+{ Expression e; Loop l; Block s;}
+{  
+   <WHILE> <LPAREN> e = expression() <RPAREN> s = block()
+   { return new Loop(e, s); }
+}
+
+Expression callStatement() :
+{ Expression c;}
+{
+   c = callOrLambda() <SEMI> { return c; }
+}
+
+Expression callOrLambda() :
+{ Token id = null; LambdaDef lambda = null; Expression e; List<Expression> args = null; }
+{
+      id = <IDENTIFIER> args = callArgs() 
+       {      	
+           return new Call(id, args);
+       }
+   | lambda = lambdaDef() [ LOOKAHEAD(2) args = callArgs()]
+       {
+       	   if (args == null) {
+       	      // This is just a Lambda expression, as a "function pointer"
+       	      return lambda;
+       	   } else {
+       	   	  // This is a call to the Lambda function:
+       	   	  return new Call(lambda, args);
+       	   }
+       }
+}
+
+List<Expression> callArgs() :
+{ Expression e; List<Expression> args = new ArrayList<Expression>();}
+{
+	<LPAREN> [ e = expression() {args.add(e);} 
+        (<COMMA> e = expression() { args.add(e); } )*] <RPAREN>
+    {
+    	return args;
+    }
+}
+
+Return returnStatement() :
+{ Token t; Return rs; Expression e = null;}
+{
+   t = <RETURN> [e = expression()] {rs = new Return(t.beginLine, curTopLevelToken.image, e); } <SEMI> { return rs; }
+}
+
+Expression expression() :
+{ Expression e1, e2, current = null; Token t; Operator o = Operator.OR; }
+{
+   e1 = conjunction() { current = e1; }
+   ( t = <OR_OP> e2 = conjunction() { current = new Binary(new OpTokenPair(o, t), current, e2); }
+   )* { return current; }
+}
+
+
+LambdaDef lambdaDef() :
+{Token id; Token lambda; Expression e; List<Token> paramNames = new ArrayList<Token>();}
+{
+	lambda = <LAMBDA> 
+	    id = <IDENTIFIER> {paramNames.add(id);} (<COMMA> id = <IDENTIFIER> {paramNames.add(id);} )*
+	<MAP_TO> e = expression() <RPAREN>
+	{
+		return new LambdaDef(lambda.beginLine, paramNames, e);
+	}
+}
+
+
+Expression conjunction() :
+{ Expression e1, e2, current = null; Token t; Operator o = Operator.AND; }
+{
+   e1 = equality() { current = e1; }
+   ( t = <AND_OP> e2 = equality() { current = new Binary(new OpTokenPair(o, t), current, e2); }
+   )* { return current; }
+}
+
+Expression equality() :
+{ Expression e1, e2, current = null; OpTokenPair o; }
+{
+   e1 = relation() { current = e1; }
+   ( o = equOp() e2 = relation() { current = new Binary(o, current, e2); }
+   )* { return current; }
+}
+
+OpTokenPair equOp () :
+{ Token t;}
+{
+    t = <EQ_OP> { return new OpTokenPair(Operator.EQ, t); }
+  | t = <NE_OP> { return new OpTokenPair(Operator.NE, t); }
+}
+
+Expression relation() :
+{ Expression e1, e2, current = null; OpTokenPair o; }
+{
+   e1 = addition() { current = e1; }
+   ( o = relOp() e2 = addition() { current = new Binary(o, current, e2); }
+   )* { return current; }
+}
+
+OpTokenPair relOp () :
+{ Token t;}
+{
+    t = <LT_OP> { return new OpTokenPair(Operator.LT, t); }
+  | t = <LE_OP> { return new OpTokenPair(Operator.LE, t); }
+  | t = <GT_OP> { return new OpTokenPair(Operator.GT, t); }
+  | t = <GE_OP> { return new OpTokenPair(Operator.GE, t); }
+}
+
+Expression addition() :
+{ Expression e1, e2, current = null; OpTokenPair o; }
+{
+  e1 = term() { current = e1; }
+  ( LOOKAHEAD(2) o = addOp() e2 = term() { current = new Binary(o, current, e2); }
+  )* { return current; }
+}
+
+OpTokenPair addOp () :
+{ Token t;}
+{
+    t = <PLUS> { return new OpTokenPair(Operator.PLUS, t); }
+  | t = <MINUS> { return new OpTokenPair(Operator.MINUS, t); }
+}
+
+Expression term() :
+{ Expression e1, e2, current = null; OpTokenPair o; }
+{
+  e1 = factor() { current = e1; }
+  ( o = mulOp() e2 = factor() { current = new Binary(o, current, e2); }
+  )* { return current; }
+}
+
+OpTokenPair mulOp () :
+{ Token t;}
+{
+    t = <MULT>  { return new OpTokenPair(Operator.TIMES, t); }
+  | t = <DIV>   { return new OpTokenPair(Operator.DIV, t); }
+  | t = <PRCNT> { return new OpTokenPair(Operator.MOD, t); }
+}
+
+Expression factor() :
+{ Expression e; OpTokenPair o = null;  }
+{
+  [ o = unaryOp() ] e = primary() { return (o == null) ? e : new Unary(o, e); }
+}
+
+OpTokenPair unaryOp () :
+{ Token t; }
+{
+    t = <MINUS> { return new OpTokenPair(Operator.NEG, t); }
+  | t = <BANG>  { return new OpTokenPair(Operator.NOT, t); }
+}
+
+Expression primary() :
+{ Expression e; Token t;}
+{
+   LOOKAHEAD(3) e = callOrLambda()    { return e; }
+  | LOOKAHEAD(3) e = funcArg()	       { return e; } //added by MST - allows a first class function to be passed as an argument, stored in a variable, or returned
+  | LOOKAHEAD(3) e = objFunc()     { return e; } //added by MST - allows you to call a method in a class and assign that value to a variable, etc.
+  | LOOKAHEAD(2) e = identifierOrArrayRef()         { return e; }
+  | e = literal()                      { return e; }
+  | LOOKAHEAD(2) t = <LBRACE> <RBRACE> { return ListTupleExpression.emptyList(t.beginLine); }
+  | e = subExpressionOrTuple()         { return e; }
+  | e = listOrListComprehension()      { return e; }
+  
+  
+/* TODO: Figure out the cast:   | type() <LPAREN> e = expression() <RPAREN>           { return e; } */
+}
+
+/*
+* added by MST
+* recognizes a the syntax for first class functions 
+*/ 
+Expression funcArg() :
+{Token id; Declaration dec = null; List<Declaration> args= new ArrayList<Declaration>(); }
+{
+	id = <IDENTIFIER> <LPAREN> (dec = parameter() {args.add(dec);})* <RPAREN> 
+        {return new FuncArg(id, args);}
+}
+
+Expression identifierOrArrayRef() :
+{Token id; Expression ref = null; }
+{
+	id = <IDENTIFIER> [LOOKAHEAD(2) <LBRACE> ref = expression() <RBRACE> ]
+	{
+		if (ref == null) {
+			return new Variable(id);
+		} else {
+			return new ListTupleReference(id, ref);
+		}
+	}	
+}
+
+Expression subExpressionOrTuple() :
+{ Expression e; Token t; List<Expression> expList = new ArrayList<Expression>(); boolean isTuple = false;}
+{
+    t = <LPAREN> [e = expression() { expList.add(e); }
+                 [
+                     <COMMA>
+                     {
+                     	isTuple = true;
+                     }
+                     [
+                         e = expression() { expList.add(e); }
+                         (<COMMA> e = expression() { expList.add(e);} )*
+                     ]
+                 ]
+              ]
+    <RPAREN> 
+    { 
+    	if (isTuple || expList.size() == 0) {
+    		// 'expList.size() == 0' account for the case of "()",
+    		// which shall be treated as an empty tuple.
+    		return new ListTupleExpression(expList, true, t.beginLine);
+    	} else {
+    		return expList.get(0);
+    	}
+    }
+}
+
+Expression listOrListComprehension() :
+{ Expression e; Token t;
+  List<Expression> members = new ArrayList<Expression>();
+}
+{
+	t = <LBRACE> e = expression() {members.add(e);} 
+	(
+	      (<COMMA> e = expression() {members.add(e);} )* <RBRACE> { return new ListTupleExpression(members, false, t.beginLine); }
+	    | <PIPE>   e = finishListComprehension(members.get(0)) <RBRACE> { return e; }
+	)
+}
+
+
+Expression finishListComprehension(Expression outFunc) :
+{   
+	Expression e;
+	Expression listValue;
+    List<Expression> conditionals = new ArrayList<Expression>();
+    List<Generator>  generators   = new ArrayList<Generator>();
+}
+{
+	generatorOrConditional(conditionals, generators) 
+	   (<COMMA> generatorOrConditional(conditionals, generators))*
+	{ return new ListComprehension(outFunc, generators, conditionals); }
+}
+
+void generatorOrConditional(List<Expression> conditionals, List<Generator> generators) :
+{ Expression e, listValue = null;}
+{
+    e = expression() [ <ELEM> listValue = expression()]
+    {
+    	if (listValue != null) {
+    		Generator g = AbstractSyntax.constructGenerator(e, listValue);
+    		generators.add(g);
+    	} else {
+    		conditionals.add(e);
+    	}
+    }
+}
+
+
+Expression literal() :
+{ Token t;}
+{
+     t = <INTEGER>  { return new IntValue(t); }
+   | t = <TRUE>     { return new BoolValue(true, t.beginLine); }
+   | t = <FALSE>    { return new BoolValue(false, t.beginLine); }
+   | t = <CLFLOAT>  { return new FloatValue(t); } 
+   | t = <CLSTRING> { return new StringValue(t); }
+}
