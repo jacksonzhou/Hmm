@@ -1488,9 +1488,11 @@ public class AbstractSyntax {
             return address;
         }
 
+        /*
         public String toString() {
             return name;
         }
+        */
 
         public boolean equals(Object obj) {
             String s = ((Variable) obj).name;
@@ -1516,6 +1518,13 @@ public class AbstractSyntax {
         public Variable getLambdaSource()
         {
             return lambdaSource;
+        }
+
+        public String toString(){
+            return "<" + this.getName() + 
+                   ", " + this.getAddress() + 
+                   ", " + this.getVarType() +
+                   ">";
         }
     }
         

@@ -20,6 +20,8 @@ public class Interpreter {
     private Variable[] debugStack;
     private int basePtr;
 
+    private RuntimeStack runtimeStack;
+
     private Program prog;
 
     // Avoid passing id down caller chain!
@@ -33,6 +35,8 @@ public class Interpreter {
         if (debug) {
             debugStack = new Variable[STACK_SIZE];
         }
+
+        runtimeStack = new RuntimeStack();
     }
     
     private void printLastStackFrame()
@@ -70,6 +74,10 @@ public class Interpreter {
         Value result = null;
         
         basePtr += call.getStackOffset();
+
+        //jz just create and add a new activation record here
+        ActivationRecord ar = new ActivationRecord();
+        //jz just create and add a new activation record here
         
         List<Declaration> params = call.getFunction().getParams();
         
@@ -80,8 +88,22 @@ public class Interpreter {
         
         for (int i = 0, size = args.size(); i < size; i++) {
             setVarValue(params.get(i).getVariable(), args.get(i)); //need to worry about this!
+
+            //jz add everything to that activation record
+            ar.addVarValue(params.get(i).getVariable(), args.get(i));
+            //jz add everything to that activation record
         }
+
+        //jz lastissue lastthing 
+        System.out.println("added new ar");
+        System.out.println(ar.toString());
+
+        //jz add new record to the stack
+        runtimeStack.addRecord(ar);
+        //jz add new record to the stack
         
+        //jz you probably need to modify this in order for the execution
+        //to actually be able to read off of the new stack
         // Now, execute the actual Function body:
         runStatement(call.getFunction().getBody());
         
@@ -723,6 +745,7 @@ public class Interpreter {
                     + var.getVarType());
         }
     }
+    
 
     public Value getVarValue(Variable var) 
         throws InterpreterRuntimeError
