@@ -271,6 +271,8 @@ public class Interpreter {
             	// NOTE: Static check is expected to fully
             	// cover the function return value;
             	setVarValue(ret.getTarget(), val);
+
+                //jz return value set
             }
             // We need to indicate that we return from the method:
             return true;
@@ -348,6 +350,7 @@ public class Interpreter {
             if (decl.getInitValue() != null) {
                 val = runExpression(decl.getInitValue());
             }
+            //jz varval
             setVarValue(decl.getVariable(), val);
         }
     }
@@ -718,6 +721,8 @@ public class Interpreter {
 
     public void setVarValue(Variable var, Value value) {
         int address = var.getAddress();    
+
+        System.out.println("trying: " + var.getVarType());
         
         switch (var.getVarType()) {
         case GLOBAL:
@@ -734,11 +739,15 @@ public class Interpreter {
 
             //jz new stack stuff here
             ActivationRecord currentRecord = runtimeStack.getRecord();
-            if(currentRecord != null){
+            if(currentRecord == null){
                 System.out.println("try to add local to ar, stack returned null");
                 System.out.println(var.toString() + value.toString());
-                currentRecord.addVarValue(var, value);
             }
+            currentRecord.addVarValue(var, value);
+
+            
+            System.out.println("stack looks like:");
+            runtimeStack.printStack();
             //jz new stack stuff here
             return;
 

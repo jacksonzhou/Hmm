@@ -18,8 +18,6 @@ public class RuntimeStack{
 
     public void addRecord(ActivationRecord ar){
         activationRecords.addFirst(ar);
-
-        printStack();
     }
 
     public ActivationRecord getRecord(){
@@ -33,9 +31,11 @@ public class RuntimeStack{
     }
 
     public void printStack(){
+        System.out.println("!!!begin!!!");
         for(ActivationRecord ar : activationRecords){
             System.out.println(ar.toString());
         }
+        System.out.println("!!!!end!!!!");
     }
 
 }
