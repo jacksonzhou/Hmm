@@ -94,16 +94,12 @@ public class Interpreter {
             //jz add everything to that activation record
         }
 
-        //jz lastissue lastthing 
-        System.out.println("added new ar");
-        System.out.println(ar.toString());
-
         //jz add new record to the stack
         runtimeStack.addRecord(ar);
         //jz add new record to the stack
         
         //jz you probably need to modify this in order for the execution
-        //to actually be able to read off of the new stack
+        //need to pass in reference to AR? or just scoop the top thing off of the stack?
         // Now, execute the actual Function body:
         runStatement(call.getFunction().getBody());
         
@@ -189,6 +185,7 @@ public class Interpreter {
      */
 
     public boolean runStatement(Statement s) throws InterpreterRuntimeError {
+        System.out.println("talk to me");
         if (s instanceof Assignment) {
             Assignment ass = (Assignment) s;
 
@@ -731,7 +728,13 @@ public class Interpreter {
                 debugStack[basePtr + address] = var;
             }
             stack[basePtr + address] = value;
+
+            //jz new stack stuff here
+            ActivationRecord currentRecord = runtimeStack.getRecord();
+            currentRecord.addVarValue(var, value);
+            //jz new stack stuff here
             return;
+
         // added later by MST - to take care of instance variables 
 	case INSTANCE: 
 	    stack[basePtr + address] = value; 

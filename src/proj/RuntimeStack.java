@@ -22,6 +22,10 @@ public class RuntimeStack{
         printStack();
     }
 
+    public ActivationRecord getRecord(){
+        return activationRecords.getFirst();
+    }
+
     public void printStack(){
         for(ActivationRecord ar : activationRecords){
             System.out.println("=========");
