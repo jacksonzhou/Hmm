@@ -124,8 +124,6 @@ public class Interpreter {
         runtimeStack.removeRecord();
         //jz next thing pop off
 
-        System.out.println("this happened--------------------------------");
-
         basePtr -= call.getStackOffset();
         return result; //this result corresponds to the result of the actualy function you're calling
     }
@@ -284,7 +282,7 @@ public class Interpreter {
                 runtimeStack.getRecord().setReturn(val);
 
                 System.out.println("setting return value");
-                runtimeStack.printStack();
+                //runtimeStack.printStack();
                 //jz return value set
             }
             // We need to indicate that we return from the method:
@@ -350,6 +348,10 @@ public class Interpreter {
             return false;
         }
         */
+        if (s instanceof ShowStack) {
+            runtimeStack.printStack();
+            return false;
+        }
 
         throw new UnsupportedOperationException(
                 "Unrecognized Statement class: " + s.getClass());
@@ -735,8 +737,6 @@ public class Interpreter {
 
     public void setVarValue(Variable var, Value value) {
         int address = var.getAddress();    
-
-        System.out.println("trying: " + var.getVarType());
         
         switch (var.getVarType()) {
         case GLOBAL:
@@ -760,8 +760,8 @@ public class Interpreter {
             currentRecord.addVarValue(var, value);
 
             
-            System.out.println("stack looks like:");
-            runtimeStack.printStack();
+            //System.out.println("stack looks like:");
+            //runtimeStack.printStack();
             //jz new stack stuff here
             return;
 

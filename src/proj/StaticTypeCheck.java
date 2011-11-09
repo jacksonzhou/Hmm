@@ -394,6 +394,10 @@ public class StaticTypeCheck
 	        //Debug.println("Saw the ObjFunction");
 	               return;
 	        }
+
+	        if (s instanceof ShowStack){
+                    return;
+                }
     	}
     	finally {
     		symbolTable.endScope(s);

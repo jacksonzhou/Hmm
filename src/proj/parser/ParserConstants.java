@@ -107,15 +107,17 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int SIGN = 53;
   /** RegularExpression Id. */
-  int INTEGER = 54;
+  int SHOWSTACK = 54;
   /** RegularExpression Id. */
-  int IDENTIFIER = 55;
+  int INTEGER = 55;
   /** RegularExpression Id. */
-  int CLFLOAT = 56;
+  int IDENTIFIER = 56;
   /** RegularExpression Id. */
-  int CLSTRING = 57;
+  int CLFLOAT = 57;
   /** RegularExpression Id. */
-  int ERROR = 58;
+  int CLSTRING = 58;
+  /** RegularExpression Id. */
+  int ERROR = 59;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -176,6 +178,7 @@ public interface ParserConstants {
     "\"Class\"",
     "\"create\"",
     "\"#\"",
+    "\"showstack\"",
     "<INTEGER>",
     "<IDENTIFIER>",
     "<CLFLOAT>",

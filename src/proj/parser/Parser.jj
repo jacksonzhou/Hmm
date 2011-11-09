@@ -81,6 +81,8 @@ TOKEN:
   | < MYCLASS:  "Class">
   | < CREATE:   "create">
   | < SIGN:     "#">
+
+  | < SHOWSTACK:   "showstack">
   
 }
 
@@ -289,6 +291,12 @@ List<Statement> statements() :
     ( s = statement() {if (s != null) { statements.add(s);} } )* { return statements; }
 }
 
+ShowStack showstack() :
+{}
+{
+    <SHOWSTACK> {return new ShowStack();}
+}
+
 Statement statement() :
 { Statement s; List<Declaration> decls;}
 {  
@@ -305,6 +313,7 @@ Statement statement() :
    | s = returnStatement()   { return s; }
    | s = objFuncWithoutAssignment() {return s;} //added by MST - calling a method in a class
 
+   | s = showstack()   { return s; }
 }
 
 /*

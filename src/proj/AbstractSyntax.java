@@ -997,6 +997,10 @@ public class AbstractSyntax {
         }
     }
 
+    public static class ShowStack extends Statement {
+
+    }
+
     public static class Block extends Statement {
         // Block = Statement*
         // (a Vector of members)
