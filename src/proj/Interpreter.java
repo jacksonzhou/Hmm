@@ -120,6 +120,12 @@ public class Interpreter {
             }
         }
 
+        //jz next thing pop off
+        runtimeStack.removeRecord();
+        //jz next thing pop off
+
+        System.out.println("this happened--------------------------------");
+
         basePtr -= call.getStackOffset();
         return result; //this result corresponds to the result of the actualy function you're calling
     }
@@ -270,8 +276,15 @@ public class Interpreter {
             	Value val = runExpression(ret.getResult());
             	// NOTE: Static check is expected to fully
             	// cover the function return value;
+
+                //jz this is the old thing, don't use it in the new model 
             	setVarValue(ret.getTarget(), val);
 
+                //jz return value set
+                runtimeStack.getRecord().setReturn(val);
+
+                System.out.println("setting return value");
+                runtimeStack.printStack();
                 //jz return value set
             }
             // We need to indicate that we return from the method:
@@ -418,6 +431,7 @@ public class Interpreter {
             if (bfName != null) {
                 return BuiltinFunctions.run(bfName, args);
             } else if (call.getFunction() != null) {
+                //jz create AR here and pass it in?
                 return callRealFunction(call, args);
 	    } else {
                 LambdaValue lambdaVal;

@@ -22,13 +22,19 @@ public class ActivationRecord{
         varValues.put(var, val);
     }
 
+    public void setReturn(Value val){
+        this.return_val = val;
+    }
+
     public String toString(){
         String temp = "=========================\n" +
                       "ar for <" + callerName + ">\n" + 
                       "=========================\n";
+
+        temp += "RETURN VALUE: " + this.return_val + "\n";
         for(Variable var : varValues.keySet()){
             temp += "var: " + var.toString() +
-                    "val: " + varValues.get(var).toString() +
+                    "   val: " + varValues.get(var).toString() +
                     "\n";
         }
 

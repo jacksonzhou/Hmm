@@ -20,6 +20,11 @@ public class RuntimeStack{
         activationRecords.addFirst(ar);
     }
 
+    //remove when the function is done running
+    public void removeRecord(){
+        activationRecords.removeFirst();
+    }
+
     public ActivationRecord getRecord(){
         try{
             return activationRecords.getFirst();
