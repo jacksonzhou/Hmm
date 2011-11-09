@@ -23,14 +23,18 @@ public class RuntimeStack{
     }
 
     public ActivationRecord getRecord(){
-        return activationRecords.getFirst();
+        try{
+            return activationRecords.getFirst();
+        }
+        catch(java.util.NoSuchElementException e){
+            System.out.println("that shit was null yo");
+            return null;
+        }
     }
 
     public void printStack(){
         for(ActivationRecord ar : activationRecords){
-            System.out.println("=========");
             System.out.println(ar.toString());
-            System.out.println("=========");
         }
     }
 

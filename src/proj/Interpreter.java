@@ -64,6 +64,10 @@ public class Interpreter {
         if (main == null) {
             throw new InterpreterRuntimeError(-1, MAIN_NOT_FOUND);
         }     
+
+        //jz adding new stack stuff
+        runtimeStack.addRecord(new ActivationRecord("main"));
+
         runStatement(main.getBody());
     }
 
@@ -76,7 +80,7 @@ public class Interpreter {
         basePtr += call.getStackOffset();
 
         //jz just create and add a new activation record here
-        ActivationRecord ar = new ActivationRecord();
+        ActivationRecord ar = new ActivationRecord(call.getFunction().getName());
         //jz just create and add a new activation record here
         
         List<Declaration> params = call.getFunction().getParams();
@@ -185,7 +189,6 @@ public class Interpreter {
      */
 
     public boolean runStatement(Statement s) throws InterpreterRuntimeError {
-        System.out.println("talk to me");
         if (s instanceof Assignment) {
             Assignment ass = (Assignment) s;
 
@@ -731,7 +734,11 @@ public class Interpreter {
 
             //jz new stack stuff here
             ActivationRecord currentRecord = runtimeStack.getRecord();
-            currentRecord.addVarValue(var, value);
+            if(currentRecord != null){
+                System.out.println("try to add local to ar, stack returned null");
+                System.out.println(var.toString() + value.toString());
+                currentRecord.addVarValue(var, value);
+            }
             //jz new stack stuff here
             return;
 

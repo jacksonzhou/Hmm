@@ -7,13 +7,15 @@ import proj.AbstractSyntax.Value;
 
 public class ActivationRecord{
 
+    private String callerName;
     private HashMap<Variable, Value> varValues;
     //also map address to value?
     private Value return_val;
 
-    public ActivationRecord(){
+    public ActivationRecord(String callerName){
         varValues = new HashMap<Variable, Value>();
         return_val = null;
+        this.callerName = callerName;
     }
 
     public void addVarValue(Variable var, Value val){
@@ -21,7 +23,9 @@ public class ActivationRecord{
     }
 
     public String toString(){
-        String temp = "";
+        String temp = "=========================\n" +
+                      "ar for <" + callerName + ">\n" + 
+                      "=========================\n";
         for(Variable var : varValues.keySet()){
             temp += "var: " + var.toString() +
                     "val: " + varValues.get(var).toString() +
