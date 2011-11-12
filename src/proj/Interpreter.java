@@ -349,6 +349,7 @@ public class Interpreter {
         }
         */
         if (s instanceof ShowStack) {
+            System.out.println("PRINTING STACK AT " + ((ShowStack)s).id);
             runtimeStack.printStack();
             return false;
         }

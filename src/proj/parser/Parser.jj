@@ -292,9 +292,9 @@ List<Statement> statements() :
 }
 
 ShowStack showstack() :
-{}
+{Token id;}
 {
-    <SHOWSTACK> {return new ShowStack();}
+    <SHOWSTACK> id = <CLSTRING> {return new ShowStack(id.image.toString());}
 }
 
 Statement statement() :

@@ -541,8 +541,10 @@ public class Parser implements ParserConstants {
   }
 
   final public ShowStack showstack() throws ParseException {
+ Token id;
     jj_consume_token(SHOWSTACK);
-                 {if (true) return new ShowStack();}
+    id = jj_consume_token(CLSTRING);
+                                 {if (true) return new ShowStack(id.image.toString());}
     throw new Error("Missing return statement in function");
   }
 

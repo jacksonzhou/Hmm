@@ -998,7 +998,11 @@ public class AbstractSyntax {
     }
 
     public static class ShowStack extends Statement {
+        public String id;
 
+        public ShowStack(String id){
+            this.id = id;
+        }
     }
 
     public static class Block extends Statement {

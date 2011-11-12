@@ -6,6 +6,6 @@ int main ( ) {
 
 int test ( int x ) {
     int test2 = 2;
-    showstack;
+    showstack "hello world";
     return test2;
 }
