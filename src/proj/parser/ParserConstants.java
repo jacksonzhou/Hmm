@@ -101,23 +101,25 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int MAP_TO = 50;
   /** RegularExpression Id. */
-  int MYCLASS = 51;
+  int CONNECT = 51;
   /** RegularExpression Id. */
-  int CREATE = 52;
+  int MYCLASS = 52;
   /** RegularExpression Id. */
-  int SIGN = 53;
+  int CREATE = 53;
   /** RegularExpression Id. */
-  int SHOWSTACK = 54;
+  int SIGN = 54;
   /** RegularExpression Id. */
-  int INTEGER = 55;
+  int SHOWSTACK = 55;
   /** RegularExpression Id. */
-  int IDENTIFIER = 56;
+  int INTEGER = 56;
   /** RegularExpression Id. */
-  int CLFLOAT = 57;
+  int IDENTIFIER = 57;
   /** RegularExpression Id. */
-  int CLSTRING = 58;
+  int CLFLOAT = 58;
   /** RegularExpression Id. */
-  int ERROR = 59;
+  int CLSTRING = 59;
+  /** RegularExpression Id. */
+  int ERROR = 60;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -175,6 +177,7 @@ public interface ParserConstants {
     "\".\"",
     "\"(\\\\\"",
     "\"->\"",
+    "\"Connect\"",
     "\"Class\"",
     "\"create\"",
     "\"#\"",

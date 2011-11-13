@@ -3,6 +3,7 @@
 
 package proj;
 
+import java.sql.DriverManager;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -10,6 +11,7 @@ import static proj.Messages.*;
 
 import proj.parser.ParseException;
 import proj.parser.Token;
+import proj.AbstractSyntax.Statement;
 
 
 /**
@@ -426,6 +428,7 @@ public class AbstractSyntax {
         }
     }
 
+
     public static class Declaration {
         // Declaration = Variable v; Type t
         private final Variable   v;
@@ -734,6 +737,45 @@ public class AbstractSyntax {
         
         // public abstract int getLineNum();
     }
+    
+    public static class Connection extends Statement { 
+    	private String databaseName;
+    	private String name;
+    	private String password;
+    	 public Connection (String n, String k, String j) {
+    	// do something in here	
+    		System.out.print("DATABASE IS: " + n + " NAME: " + k + " PASSWORD " + j);
+    		System.out.println("NOW YOU HAVE TO CALL establishConnection");
+    	}
+    	
+      	public Connection () {
+        // do something in here	
+      		System.out.print("USED EMPTY CONSTRUCTOR!!!!!");
+        }
+      	
+      	/*databaseName = url of the database.
+      	 * name = user name.
+      	 * password = the user's password.
+      	 * Given the URL, userName and password, this method will establish
+      	 * a connection with the database at the given database URL,
+      	 */
+      	public void establishConnection() {
+      		try {
+      		java.sql.Connection conn = 
+      			DriverManager.getConnection(databaseName, name, password);
+      	    System.out.println("Connected to database");
+      		}
+      		catch (java.sql.SQLException e) {
+      			System.err.println(" ABSTRACTSYNTAX CANNOT ESTABLISH CONNECTION ");
+      			
+      		}
+      	}
+      	
+    	 public void doThis(){
+    		System.out.println("We get to here");
+    	}
+    }
+
 
     /*
     public static class Skip extends Statement {

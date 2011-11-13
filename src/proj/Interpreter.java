@@ -284,6 +284,12 @@ public class Interpreter {
             return true;
         }
         
+        if (s instanceof Connection) {
+
+            // We need to indicate that we return from the method:
+            return true;
+        }
+        
         if (s instanceof DeclContainer) {
             // We need to evaluate the expressions in the declarations, 
             // and also reserve the stack locations for these variables.
@@ -848,3 +854,4 @@ public class Interpreter {
         }
     }
 }
+
