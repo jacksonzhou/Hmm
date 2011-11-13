@@ -739,6 +739,11 @@ public class Interpreter {
                 debugStack[address] = var;
             }
             stack[address] = value;
+
+            //jz new stack stuff here
+            runtimeStack.setGlobal(var, value);
+            //jz new stack stuff here
+
             return;
         case LOCAL:
             if (debug) {
@@ -753,10 +758,6 @@ public class Interpreter {
                 System.out.println(var.toString() + value.toString());
             }
             currentRecord.addVarValue(var, value);
-
-            
-            //System.out.println("stack looks like:");
-            //runtimeStack.printStack();
             //jz new stack stuff here
             return;
 
