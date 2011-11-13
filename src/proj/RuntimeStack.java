@@ -16,6 +16,10 @@ public class RuntimeStack{
         activationRecords = new LinkedList<ActivationRecord>();
     }
 
+    public void setGlobal(Variable var, Value val){
+        globalVarValues.put(var, val);
+    }
+
     public void addRecord(ActivationRecord ar){
         activationRecords.addFirst(ar);
     }
@@ -36,11 +40,20 @@ public class RuntimeStack{
     }
 
     public void printStack(){
-        System.out.println("!!!begin!!!");
+        printGlobals();
         for(ActivationRecord ar : activationRecords){
             System.out.println(ar.toString());
         }
-        System.out.println("!!!!end!!!!");
+    }
+
+    public void printGlobals(){
+        System.out.println("++++++++++++++++++++");
+        System.out.println("Global Variables");
+        System.out.println("++++++++++++++++++++");
+        for(Variable var : globalVarValues.keySet()){
+            System.out.println("var: " + var.toString() +
+                    "   val: " + globalVarValues.get(var).toString());
+        }
     }
 
 }

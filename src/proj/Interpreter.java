@@ -82,6 +82,9 @@ public class Interpreter {
         //jz just create and add a new activation record here
         ActivationRecord ar = new ActivationRecord(call.getFunction().getName());
         //jz just create and add a new activation record here
+        //jz add new record to the stack
+        runtimeStack.addRecord(ar);
+        //jz add new record to the stack
         
         List<Declaration> params = call.getFunction().getParams();
         
@@ -93,18 +96,13 @@ public class Interpreter {
         for (int i = 0, size = args.size(); i < size; i++) {
             setVarValue(params.get(i).getVariable(), args.get(i)); //need to worry about this!
 
+            /*
             //jz add everything to that activation record
             ar.addVarValue(params.get(i).getVariable(), args.get(i));
             //jz add everything to that activation record
+            */
         }
 
-        //jz add new record to the stack
-        runtimeStack.addRecord(ar);
-        //jz add new record to the stack
-        
-        //jz you probably need to modify this in order for the execution
-        //need to pass in reference to AR? or just scoop the top thing off of the stack?
-        // Now, execute the actual Function body:
         runStatement(call.getFunction().getBody());
         
         if (debug) {
@@ -280,9 +278,6 @@ public class Interpreter {
 
                 //jz return value set
                 runtimeStack.getRecord().setReturn(val);
-
-                System.out.println("setting return value");
-                //runtimeStack.printStack();
                 //jz return value set
             }
             // We need to indicate that we return from the method:
@@ -366,7 +361,6 @@ public class Interpreter {
             if (decl.getInitValue() != null) {
                 val = runExpression(decl.getInitValue());
             }
-            //jz varval
             setVarValue(decl.getVariable(), val);
         }
     }
@@ -745,6 +739,11 @@ public class Interpreter {
                 debugStack[address] = var;
             }
             stack[address] = value;
+
+            //jz new stack stuff here
+            runtimeStack.setGlobal(var, value);
+            //jz new stack stuff here
+
             return;
         case LOCAL:
             if (debug) {
@@ -759,10 +758,6 @@ public class Interpreter {
                 System.out.println(var.toString() + value.toString());
             }
             currentRecord.addVarValue(var, value);
-
-            
-            //System.out.println("stack looks like:");
-            //runtimeStack.printStack();
             //jz new stack stuff here
             return;
 

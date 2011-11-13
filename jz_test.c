@@ -1,11 +1,13 @@
+int j = 3;
+int k = 3 + 3;
+int l = j;
 int main ( ) {
-    int main1 = 1;
-    int main2 = test(main1);
+    int main2 = test(3);
+    showstack "break 2";
     return 0;
 }
 
 int test ( int x ) {
-    int test2 = 2;
     showstack "hello world";
-    return test2;
+    return x;
 }
