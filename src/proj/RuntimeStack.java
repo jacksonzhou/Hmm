@@ -8,8 +8,8 @@ import proj.AbstractSyntax.Value;
 
 public class RuntimeStack{
 
-    private HashMap<Variable, Value> globalVarValues;
-    private LinkedList<ActivationRecord> activationRecords;
+    public HashMap<Variable, Value> globalVarValues;
+    public LinkedList<ActivationRecord> activationRecords;
 
     public RuntimeStack(){
         globalVarValues = new HashMap<Variable, Value>();
@@ -18,6 +18,10 @@ public class RuntimeStack{
 
     public void setGlobal(Variable var, Value val){
         globalVarValues.put(var, val);
+    }
+
+    public Value getGlobal(Variable var){
+        return globalVarValues.get(var);
     }
 
     public void addRecord(ActivationRecord ar){

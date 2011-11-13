@@ -1490,6 +1490,10 @@ public class AbstractSyntax {
         {
             return varType;
         }
+        public void setVarType(VarType varType)
+        {
+            this.varType = varType;
+        }
         
         public int getAddress()
         {

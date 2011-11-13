@@ -22,6 +22,10 @@ public class ActivationRecord{
         varValues.put(var, val);
     }
 
+    public Value getVarValue(Variable var){
+        return varValues.get(var);
+    }
+
     public void setReturn(Value val){
         this.return_val = val;
     }

@@ -782,12 +782,31 @@ public class Interpreter {
         int address = var.getAddress();
         Value val;
 
+        /* hack to make globals work like
+
+           int j = l; //where l is another global
+
+           before it just crashed since getType was null and you 
+           tried to switch on it; even if it's hacky, theres no loss atm
+           bad original architecture though :(
+        */
+        if(var.getVarType() == null){
+            //if type is null, assume Global
+            var.setVarType(Variable.VarType.GLOBAL);
+        }
+
         switch (var.getVarType()) {
         case GLOBAL:
-            val =  stack[address];
+            //jz old thing, I'm ripping it out
+            //val =  stack[address];
+            //jz old thing, I'm ripping it out
+            val = runtimeStack.getGlobal(var);
             break;
         case LOCAL:
-            val =  stack[basePtr + address];
+            //jz old thing, I'm ripping it out
+            //val =  stack[basePtr + address];
+            //jz old thing, I'm ripping it out
+            val =  runtimeStack.getRecord().getVarValue(var);
             break;
         case LAMBDA:
             LambdaValue lastLambda = lambdaStack.get(lambdaStack.size() - 1);
