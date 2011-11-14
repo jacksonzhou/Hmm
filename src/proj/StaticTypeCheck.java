@@ -31,6 +31,7 @@ import proj.AbstractSyntax.MyClass;
 import proj.AbstractSyntax.Constructor;
 import proj.AbstractSyntax.MyObject;
 import proj.AbstractSyntax.ObjFunction;
+//import proj.Connection;
 
 public class StaticTypeCheck 
 {
@@ -198,6 +199,10 @@ public class StaticTypeCheck
 	            return;
  	        }
 	        
+	        if (s instanceof Connection) {
+	        	return;
+	        }
+	        
 	        if (s instanceof DeclContainer) {
 	        	List<Declaration> decList = ((DeclContainer)s).getDeclarations();
 	        	
@@ -341,6 +346,10 @@ public class StaticTypeCheck
 	            }
 	            return;
  	        }
+	        
+	        if (s instanceof Connection) {
+	        	return;
+	        } 
 	        
 	        if (s instanceof DeclContainer) {
 	        	List<Declaration> decList = ((DeclContainer)s).getDeclarations();
