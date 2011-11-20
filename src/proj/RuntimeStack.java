@@ -56,7 +56,7 @@ public class RuntimeStack{
         System.out.println("++++++++++++++++++++");
         for(Variable var : globalVarValues.keySet()){
             System.out.println("var: " + var.toString() +
-                    "   val: " + globalVarValues.get(var).toString());
+                    "   val: " + ((globalVarValues.get(var).toString() == null) ? globalVarValues.get(var).toString() : "null" ));
         }
     }
 
