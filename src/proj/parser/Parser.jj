@@ -78,11 +78,13 @@ TOKEN:
   | < DOT:      "." >
   | < LAMBDA:   "(\\">
   | < MAP_TO:   "->">
-  | <CONNECT:   "Connect">
+  | < CONNECT:   "Connect">
   | < MYCLASS:  "Class">
-  | < CREATE:   "create">
+  | < CREATEDATABASE:  "CreateDatabase">
+  | < CREATE:    "create">
+  | < INSERT:    "Insert">
+  | < DED:       "DisplayEntireDatabase">
   | < SIGN:     "#">
-
   | < SHOWSTACK:   "showstack">
   
 }
@@ -103,10 +105,32 @@ TOKEN:
     <ERROR: ~[] >
 }
 
-Connection connection() :{Token database; Token userName; Token password;}
+ConnectionToUrl connectionToUrl() :{Token database; Token userName; Token password;}
 {
  <CONNECT> database = <CLSTRING>  userName = <CLSTRING>  password = <CLSTRING>
- {return new Connection(database.image.toString(), userName.image.toString(), password.image.toString());}
+ {return new ConnectionToUrl(database.image.toString(), userName.image.toString(), password.image.toString());}
+}
+
+// insert a tripple; assume connection is established and we are adding to the current 
+// database
+Insert 	insert() :{Token subject; Token relationship; Token object; Token database; Token userName; Token password;}
+{
+ <INSERT> subject = <CLSTRING>  relationship = <CLSTRING> object = <CLSTRING> database = <CLSTRING>  userName = <CLSTRING>  password = <CLSTRING>
+ {return new Insert(subject.image.toString(), relationship.image.toString(), object.image.toString(), database.image.toString(), userName.image.toString(), password.image.toString());}
+}
+
+//database is always a triple with form subject, relationship, object
+CreateDatabase 	createDatabase() :{Token databaseName; Token databaseUrl; Token userName; Token password;}
+{
+ <CREATEDATABASE>  databaseName = <CLSTRING> databaseUrl = <CLSTRING>  userName = <CLSTRING>  password = <CLSTRING>
+ {return new CreateDatabase(databaseName.image.toString() ,databaseUrl.image.toString(), userName.image.toString(), password.image.toString());}
+}
+
+//database is always a triple with form subject, relationship, object
+DisplayEntireDatabase displayEntireDatabase() :{Token databaseName; Token databaseUrl; Token userName; Token password;}
+{
+ <DED>  databaseName = <CLSTRING> databaseUrl = <CLSTRING>  userName = <CLSTRING>  password = <CLSTRING>
+ {return new DisplayEntireDatabase(databaseName.image.toString() ,databaseUrl.image.toString(), userName.image.toString(), password.image.toString());}
 }
 
 // We are generously allowing the global variables to live.
@@ -306,22 +330,25 @@ ShowStack showstack() :
 
 Statement statement() :
 { Statement s; List<Declaration> decls;}
-{  
+{   
      <SEMI>                  { return null; }
-   | decls = declaration()   { return new DeclContainer(decls); }
-   | s = block()             { return s; }
-   | s = forEach()           { return s; }
-   | LOOKAHEAD(2) s = assignment()        { return s; }
-   | s = ifStatement()       { return s; }
-   | s = whileStatement()    { return s; }
+   | decls = declaration()   {return new DeclContainer(decls); }
+   | s = block()             {return s; }
+   | s = forEach()           {return s; }
+   | LOOKAHEAD(2) s = assignment()        {return s; }
+   | s = ifStatement()       {return s; }
+   | s = whileStatement()    {return s; }
    /* TODO: Add the 'for' statement */
-   | LOOKAHEAD(2) s = callStatement()     { return s; }
-   | LOOKAHEAD(2) s = obj()		     { return s; }
-   | s = returnStatement()   { return s; }
+   | LOOKAHEAD(2) s = callStatement()     {return s; }
+   | LOOKAHEAD(2) s = obj()		     {return s; }
+   | s = returnStatement()   {return s; }
    | s = objFuncWithoutAssignment() {return s;} //added by MST - calling a method in a class
 
    | s = showstack()   { return s; }
-   | s = connection() {return s;}
+   | s = connectionToUrl() { return s;}
+   | s = insert() {return s;}
+   | s = createDatabase() {return s;}
+   | s = displayEntireDatabase() {return s;}
 }
 
 /*

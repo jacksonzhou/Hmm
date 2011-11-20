@@ -21,18 +21,15 @@ public class Hmm {
         Program prog = parser.Program();
         
         StaticTypeCheck staticTypeCheck = new StaticTypeCheck();
-        
         staticTypeCheck.checkProgram(prog);
         
-        prog.display();
-        
+        prog.display();       
         if (staticTypeCheck.getErrLogger().hasErrors()) {
             System.err.println("ABORTING EXECUTION DUE TO THE ERRORS");
         } else {
             Interpreter interpreter = new Interpreter(false);
             interpreter.runProgram(prog);
         }
-
         /*
         System.out.println("\nBegin type checking . . .");
         System.out.println("\nType map:");

@@ -3,7 +3,9 @@
 
 package proj;
 
+import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -738,18 +740,18 @@ public class AbstractSyntax {
         // public abstract int getLineNum();
     }
     
-    public static class Connection extends Statement { 
-    	private String databaseName;
-    	private String name;
-    	private String password;
-    	 public Connection (String n, String k, String j) {
+    public static class ConnectionToUrl extends Statement { 
+    	private static String databaseName;
+    	private static String name;
+    	private static String password;
+    	 public ConnectionToUrl (String dbUrl, String usrnm, String psswd) {
     	// do something in here	
-    		System.out.print("DATABASE IS: " + n + " NAME: " + k + " PASSWORD " + j);
+    		System.out.print("DATABASE IS: " + dbUrl + " NAME: " + usrnm + " PASSWORD " + psswd);
     		System.out.println("NOW YOU HAVE TO CALL establishConnection");
+    		establishConnection(dbUrl, usrnm, psswd);
     	}
-    	
-      	public Connection () {
-        // do something in here	
+    	// This should not happen, this is a sanity check
+      	public ConnectionToUrl () {
       		System.out.print("USED EMPTY CONSTRUCTOR!!!!!");
         }
       	
@@ -759,23 +761,110 @@ public class AbstractSyntax {
       	 * Given the URL, userName and password, this method will establish
       	 * a connection with the database at the given database URL,
       	 */
-      	public void establishConnection() {
-      		try {
-      		java.sql.Connection conn = 
-      			DriverManager.getConnection(databaseName, name, password);
-      	    System.out.println("Connected to database");
-      		}
-      		catch (java.sql.SQLException e) {
-      			System.err.println(" ABSTRACTSYNTAX CANNOT ESTABLISH CONNECTION ");
-      			
-      		}
+      	public Connection establishConnection(String databaseUrl, String username, String password) 
+      	{	
+      	  System.out.println("Current data: \ndatabaseName " + databaseName + 
+      			  "\nUserName " + name+ "\nPassword"  + password);
+      	  
+      	String driver = "oracle.jdbc.driver.OracleDriver";
+    	//databaseUrl = "jdbc:oracle:thin:@rising-sun.microlab.cs.utexas.edu:1521:orcl";
+   		//username = "cs345_18";
+    	//password = "orcl_7857"; 
+    	Connection conn = null;
+    	try {
+			Class.forName(driver);
+					conn = DriverManager.getConnection(databaseUrl, username, password);
+    	} catch (ClassNotFoundException e) {
+			System.out.println("Connection not established. Msg from AbstractSyntax.\n");
+			e.printStackTrace();
+		} catch (SQLException e) {
+			System.out.println("Connection not established; SQL Exception. Msg from AbstractSyntax.\n");
+			e.printStackTrace();
+		}
+
+    	return conn;
       	}
-      	
-    	 public void doThis(){
-    		System.out.println("We get to here");
+    }//end of class
+    
+    public static class Insert extends ConnectionToUrl {
+    	private static String []rowToInsert = new String [3]; //has format [subject, relatiohship, object]
+    	private static String tableName;
+    	private static Connection c = null;
+    	public Insert (String subject, String relationship, String object,
+    			String dbName, String name, String password) {
+    		rowToInsert[0] = subject;
+    		rowToInsert[1] = relationship;
+    		rowToInsert[2] = object;
+    		tableName = "Temporary_name; must change";
+    		// establish connection first
+    		c = super.establishConnection(dbName, name, password);
     	}
+    	
+    	public void insertTripleIntoDatabase (String [] row) {
+    		   java.sql.Statement stmt = null;
+    		   
+    		   try {
+    			   stmt = c.createStatement();
+    			   String insertStatement = "INSERT INTO " + tableName + " VALUES(";
+    			   //add all of the rows of the table to the table definition
+    			   for (int currentColumn = 0; currentColumn < row.length; currentColumn++) {
+    				   insertStatement+= "'" + row[currentColumn]+ "'";
+    				   if(currentColumn < row.length-1) insertStatement+= ", ";
+    				   else insertStatement += ")";
+    			   }
+    			   System.out.println(insertStatement);
+    			   stmt.executeUpdate(insertStatement); 
+    			   // commit the transaction
+    			   c.commit();
+    			   // set auto commit to true (from now on every single
+    			   // statement will be treated as a single transaction
+    			   c.setAutoCommit(true);
+    		   } catch (SQLException e) {
+    			   System.err.println("Could not insert into table");
+    			   e.printStackTrace();
+    		   } finally {
+    			   try {
+    				   //connection.close();
+    				   stmt.close();
+    			   } catch (SQLException e) {
+    				   System.err.println("Connection or statement could not be closed correctly");
+    				   e.printStackTrace();
+    			   }
+    		   }
+    		   
+    	}
+    	
+    }
+    
+    public static class CreateDatabase extends ConnectionToUrl {
+
+    	public CreateDatabase (String dbName, String dbUrl, String name, String password) {
+    		// establish connection first
+    		super.establishConnection(dbName, name, password);
+    		System.out.println("Message comes from Abstract Syntax. Create table created but has not inserted.");
+    	}
+    	
+    	public void createDatabase () {
+    		System.out.println("Message comes from Abstract Syntax. Copy create database function" +
+    				"from ConnectionFile2");
+    	}
+    	
     }
 
+    public static class DisplayEntireDatabase extends ConnectionToUrl {
+
+    	public DisplayEntireDatabase (String dbName, String dbUrl, String name, String password) {
+    		// establish connection first
+    		super.establishConnection(dbName, name, password);
+    		System.out.println("Message comes from Abstract Syntax. Display table created but is not really displaying.");
+    	}
+    	
+    	public void displayDatabase () {
+    		System.out.println("Message comes from Abstract Syntax. Copy display database function" +
+    				"from ConnectionFile2");
+    	}
+    	
+    }
 
     /*
     public static class Skip extends Statement {
