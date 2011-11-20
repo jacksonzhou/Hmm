@@ -737,31 +737,27 @@ public class AbstractSyntax {
         	return 0;
         }
         
-        // public abstract int getLineNum();
     }
     
-    public static class ConnectionToUrl extends Statement { 
-    	private static String databaseName;
-    	private static String name;
-    	private static String password;
+    public static class ConnectionToUrl extends Statement {
+    	String databaseUrl; String username; String password;
+    	Connection conn = null;
     	 public ConnectionToUrl (String dbUrl, String usrnm, String psswd) {
     	// do something in here	
-    		System.out.print("DATABASE IS: " + dbUrl + " NAME: " + usrnm + " PASSWORD " + psswd);
-    		System.out.println("NOW YOU HAVE TO CALL establishConnection");
-    		establishConnection(dbUrl, usrnm, psswd);
+    		 databaseUrl = dbUrl; 
+    		 username = usrnm;
+    		 password = psswd;
+    		System.out.print("\nDATABASE IS: " + databaseUrl + 
+    				"\nNAME: " + username + 
+    				"\nPASSWORD: " + password);
+    		System.out.println("\nNOW YOU HAVE TO CALL establishConnection");
+    		conn = establishConnection();
     	}
-    	// This should not happen, this is a sanity check
-      	public ConnectionToUrl () {
-      		System.out.print("USED EMPTY CONSTRUCTOR!!!!!");
-        }
       	
-      	/*databaseName = url of the database.
-      	 * name = user name.
-      	 * password = the user's password.
-      	 * Given the URL, userName and password, this method will establish
+      	/* Given the URL, userName and password, this method will establish
       	 * a connection with the database at the given database URL,
       	 */
-      	public Connection establishConnection(String databaseUrl, String username, String password) {	     	  
+      	public Connection establishConnection() {	     	  
       		System.out.println("Current data: \ndatabaseName " + databaseUrl + 
     			  "\nUserName " + username+ "\nPassword"  + password);
       	  
@@ -769,7 +765,7 @@ public class AbstractSyntax {
     	//databaseUrl = "jdbc:oracle:thin:@rising-sun.microlab.cs.utexas.edu:1521:orcl";
    		//username = "cs345_18";
     	//password = "orcl_7857"; 
-    	Connection conn = null;
+    	//Connection conn = null;
     	try {
 			Class.forName(driver);
 					conn = DriverManager.getConnection(databaseUrl, username, password);
@@ -785,7 +781,7 @@ public class AbstractSyntax {
       	}
     }//end of class
     
-    public static class Insert extends ConnectionToUrl {
+    public static class Insert extends Statement {
     	private static String []rowToInsert = new String [3]; //has format [subject, relatiohship, object]
     	private static String tableName;
     	private static Connection c = null;
@@ -796,8 +792,10 @@ public class AbstractSyntax {
     		rowToInsert[2] = object;
     		tableName = "Temporary_name; must change";
     		// establish connection first
-    		c = super.establishConnection(dbName, name, password);
-    		 insertTripleIntoDatabase();
+    		
+    		ConnectionToUrl connectionToUrl= new ConnectionToUrl (dbName, name, password);
+    		c = connectionToUrl.establishConnection();
+    		insertTripleIntoDatabase();
     	}
     	
     	public void insertTripleIntoDatabase () {
@@ -835,11 +833,12 @@ public class AbstractSyntax {
     	
     } //end of class
     
-    public static class CreateDatabase extends ConnectionToUrl {
-
+    public static class CreateDatabase extends Statement {
+    	public static Connection c =null;
     	public CreateDatabase (String dbName, String dbUrl, String name, String password) {
     		// establish connection first
-    		super.establishConnection(dbName, name, password);
+       		ConnectionToUrl connectionToUrl= new ConnectionToUrl (dbName, name, password);
+    		c = connectionToUrl.establishConnection();
     		System.out.println("Message comes from Abstract Syntax. Create table created but has not inserted.");
     	}
     	
@@ -850,11 +849,12 @@ public class AbstractSyntax {
     	
     }
 
-    public static class DisplayEntireDatabase extends ConnectionToUrl {
-
+    public static class DisplayEntireDatabase extends Statement {
+    	Connection c = null;
     	public DisplayEntireDatabase (String dbName, String dbUrl, String name, String password) {
     		// establish connection first
-    		super.establishConnection(dbName, name, password);
+       		ConnectionToUrl connectionToUrl= new ConnectionToUrl (dbName, name, password);
+    		c = connectionToUrl.establishConnection();
     		System.out.println("Message comes from Abstract Syntax. Display table created but is not really displaying.");
     	}
     	
