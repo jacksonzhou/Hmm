@@ -430,6 +430,7 @@ public class AbstractSyntax {
         }
     }
 
+
     public static class Declaration {
         // Declaration = Variable v; Type t
         private final Variable   v;
@@ -760,10 +761,9 @@ public class AbstractSyntax {
       	 * Given the URL, userName and password, this method will establish
       	 * a connection with the database at the given database URL,
       	 */
-      	public Connection establishConnection(String databaseUrl, String username, String password) 
-      	{	
-      	  System.out.println("Current data: \ndatabaseName " + databaseName + 
-      			  "\nUserName " + name+ "\nPassword"  + password);
+      	public Connection establishConnection(String databaseUrl, String username, String password) {	     	  
+      		System.out.println("Current data: \ndatabaseName " + databaseUrl + 
+    			  "\nUserName " + username+ "\nPassword"  + password);
       	  
       	String driver = "oracle.jdbc.driver.OracleDriver";
     	//databaseUrl = "jdbc:oracle:thin:@rising-sun.microlab.cs.utexas.edu:1521:orcl";
@@ -797,18 +797,19 @@ public class AbstractSyntax {
     		tableName = "Temporary_name; must change";
     		// establish connection first
     		c = super.establishConnection(dbName, name, password);
+    		 insertTripleIntoDatabase();
     	}
     	
-    	public void insertTripleIntoDatabase (String [] row) {
+    	public void insertTripleIntoDatabase () {
     		   java.sql.Statement stmt = null;
     		   
     		   try {
     			   stmt = c.createStatement();
     			   String insertStatement = "INSERT INTO " + tableName + " VALUES(";
     			   //add all of the rows of the table to the table definition
-    			   for (int currentColumn = 0; currentColumn < row.length; currentColumn++) {
-    				   insertStatement+= "'" + row[currentColumn]+ "'";
-    				   if(currentColumn < row.length-1) insertStatement+= ", ";
+    			   for (int currentColumn = 0; currentColumn < rowToInsert.length; currentColumn++) {
+    				   insertStatement+= "'" + rowToInsert[currentColumn]+ "'";
+    				   if(currentColumn < rowToInsert.length-1) insertStatement+= ", ";
     				   else insertStatement += ")";
     			   }
     			   System.out.println(insertStatement);
@@ -823,17 +824,16 @@ public class AbstractSyntax {
     			   e.printStackTrace();
     		   } finally {
     			   try {
-    				   //connection.close();
+    				   c.close();
     				   stmt.close();
     			   } catch (SQLException e) {
     				   System.err.println("Connection or statement could not be closed correctly");
     				   e.printStackTrace();
     			   }
-    		   }
-    		   
-    	}
+    		   }//end of finally   
+    	} //end of insertTripleIntoDatabase
     	
-    }
+    } //end of class
     
     public static class CreateDatabase extends ConnectionToUrl {
 
@@ -1619,11 +1619,6 @@ public class AbstractSyntax {
         public VarType getVarType()
         {
             return varType;
-        }
-
-        public void setVarType(VarType varType)
-        {
-            this.varType = varType;
         }
         
         public int getAddress()
