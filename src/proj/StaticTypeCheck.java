@@ -152,6 +152,10 @@ public class StaticTypeCheck
 	        if (s instanceof Insert) {
 	        	return;
 	        }
+
+	        if (s instanceof ShowStack) {
+	        	return;
+	        }
 	        
 	        if (s instanceof CreateDatabase) {
 	        	return;
