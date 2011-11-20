@@ -11,9 +11,10 @@
 
   <property name="src.dir"    value="src"/>
   <property name="bin.dir"    value="bin"/>
+  <property name="lib.dir"    value="ext"/>
 
-  <path id="compile.classpath">
-    <pathelement location="ext/ojdbc6.jar"/>
+  <path id="classpath">
+    <fileset dir="${lib.dir}" includes="**/*.jar"/>
   </path>
   
   <target name="printJavaVersion">
