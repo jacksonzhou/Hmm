@@ -11,6 +11,10 @@
 
   <property name="src.dir"    value="src"/>
   <property name="bin.dir"    value="bin"/>
+
+  <path id="compile.classpath">
+    <pathelement location="ext/ojdbc6.jar"/>
+  </path>
   
   <target name="printJavaVersion">
     <echo message="       YOU ARE USING JAVA ${java.version}"/>
