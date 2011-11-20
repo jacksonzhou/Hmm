@@ -430,7 +430,6 @@ public class AbstractSyntax {
         }
     }
 
-
     public static class Declaration {
         // Declaration = Variable v; Type t
         private final Variable   v;
@@ -1620,6 +1619,11 @@ public class AbstractSyntax {
         public VarType getVarType()
         {
             return varType;
+        }
+
+        public void setVarType(VarType varType)
+        {
+            this.varType = varType;
         }
         
         public int getAddress()
