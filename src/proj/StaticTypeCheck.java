@@ -153,6 +153,10 @@ public class StaticTypeCheck
 	        	return;
 	        }
 
+		if (s instanceof CloseConnection) {
+	        	return;
+	        }
+
 	        if (s instanceof ShowStack) {
 	        	return;
 	        }

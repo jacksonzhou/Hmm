@@ -1,5 +1,6 @@
 package proj;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class Interpreter {
     // Avoid passing id down caller chain!
     //private Lambda curLambda;
 
+    private static Connection staticConnection = null;
     public Interpreter(boolean debug)
     {
         this.debug = debug;
@@ -190,28 +192,35 @@ public class Interpreter {
             // We need to indicate that we return from the method:
             return true;
         }
+       
         
         if (s instanceof ConnectionToUrl) {
-
-            // We need to indicate that we return from the method:
-            return true;
+            staticConnection = ((ConnectionToUrl)s).establishConnection();
+            System.out.println("done establishing connection");
+            return false;
         }
         
         if (s instanceof CreateDatabase) {
-
-        	((CreateDatabase)s).createDatabase();
-
-            return true;
+        	((CreateDatabase)s).createDatabase(staticConnection);
+            return false;
         }
         if (s instanceof DisplayEntireDatabase) {
-        	((DisplayEntireDatabase)s).displayDatabase();
-        	return true;
+        		((DisplayEntireDatabase)s).displayDatabase(staticConnection);
+        		return false;
         }
+        
         if (s instanceof Insert) {
-        	((Insert)s).insertTripleIntoDatabase();
+        	((Insert)s).insertTripleIntoDatabase(staticConnection);
+            return false;
+        }
+        
+        if (s instanceof CloseConnection) {
+        	((CloseConnection)s).executeConnectionClosing(staticConnection);
+        	System.out.println("connection closed by interpreter");
             // We need to indicate that we return from the method:
             return true;
         }
+        
         if (s instanceof DeclContainer) {
             // We need to evaluate the expressions in the declarations, 
             // and also reserve the stack locations for these variables.

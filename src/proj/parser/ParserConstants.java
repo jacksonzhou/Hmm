@@ -111,21 +111,23 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int INSERT = 55;
   /** RegularExpression Id. */
-  int DED = 56;
+  int CLOSECONNECTION = 56;
   /** RegularExpression Id. */
-  int SIGN = 57;
+  int DED = 57;
   /** RegularExpression Id. */
-  int SHOWSTACK = 58;
+  int SIGN = 58;
   /** RegularExpression Id. */
-  int INTEGER = 59;
+  int SHOWSTACK = 59;
   /** RegularExpression Id. */
-  int IDENTIFIER = 60;
+  int INTEGER = 60;
   /** RegularExpression Id. */
-  int CLFLOAT = 61;
+  int IDENTIFIER = 61;
   /** RegularExpression Id. */
-  int CLSTRING = 62;
+  int CLFLOAT = 62;
   /** RegularExpression Id. */
-  int ERROR = 63;
+  int CLSTRING = 63;
+  /** RegularExpression Id. */
+  int ERROR = 64;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -188,6 +190,7 @@ public interface ParserConstants {
     "\"CreateDatabase\"",
     "\"create\"",
     "\"Insert\"",
+    "\"CloseConnection\"",
     "\"DisplayEntireDatabase\"",
     "\"#\"",
     "\"showstack\"",
