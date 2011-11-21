@@ -36,9 +36,10 @@ public class ActivationRecord{
                       "=========================\n";
 
         temp += "RETURN VALUE: " + this.return_val + "\n";
+
         for(Variable var : varValues.keySet()){
             temp += "var: " + var.toString() +
-                    "   val: " + varValues.get(var).toString() +
+                    "   val: " + ((varValues.get(var) != null ) ? varValues.get(var).toString() : "null") +
                     "\n";
         }
 
