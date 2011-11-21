@@ -748,23 +748,20 @@ public class AbstractSyntax {
     		 databaseUrl = dbUrl.substring(1, dbUrl.length()-1); 
     		 username = usrnm.substring(1, usrnm.length()-1);;
     		 password = psswd.substring(1, psswd.length()-1);;
-    		System.out.print("\nDATABASEURL IS: " + databaseUrl + 
-    				"\nUserNAME: " + username + 
-    				"\nPASSWORD: " + password);
-    		System.out.println("\nNOW YOU HAVE TO CALL establishConnection");
     	}
       	
       	/* Given the URL, userName and password, this method will establish
       	 * a connection with the database at the given database URL,
       	 */
-      	public Connection establishConnection() {	     	  
-      		System.out.println("Current data: \ndatabaseUrl " + databaseUrl + 
+      	public Connection establishConnection() {	   
+      		String driver = "oracle.jdbc.driver.OracleDriver";
+      		//databaseUrl = "jdbc:oracle:thin:@rising-sun.microlab.cs.utexas.edu:1521:orcl";
+      		//username = "cs345_18";
+      		//password = "orcl_7857"; 
+
+      		System.out.println("Data from establishConnection: \ndatabaseUrl " + databaseUrl + 
     			  "\nUserName " + username+ "\nPassword "  + password);
-      	  
-      	String driver = "oracle.jdbc.driver.OracleDriver";
-    	databaseUrl = "jdbc:oracle:thin:@rising-sun.microlab.cs.utexas.edu:1521:orcl";
-   		username = "cs345_18";
-    	password = "orcl_7857"; 
+      		System.out.println("gets out of from establishConnection: \n");
     	Connection conn = null;
     	try {
 			Class.forName(driver);
@@ -782,23 +779,17 @@ public class AbstractSyntax {
     }//end of class
     
     public static class Insert extends Statement {
-    	private static String []rowToInsert = new String [3]; //has format [subject, relatiohship, object]
-    	private static String dbName;
-    	private static Connection c = null;
-    	public Insert (String databaseName ,String subject, String relationship, String object,
-    			String dbUrl, String name, String password) {
+    	private String []rowToInsert = new String [3]; //has format [subject, relatiohship, object]
+    	private String dbName;
+    	
+    	public Insert (String databaseName ,String subject, String relationship, String object) {
     		rowToInsert[0] = subject.substring(1, subject.length()-1);
     		rowToInsert[1] = relationship.substring(1, relationship.length()-1);
     		rowToInsert[2] = object.substring(1, object.length()-1);
-    		dbName = databaseName.substring(1, databaseName.length()-1);
-    		// establish connection first
-    		
-    		ConnectionToUrl connectionToUrl= new ConnectionToUrl (dbUrl, name, password);
-    		c = connectionToUrl.establishConnection();
-    		
+    		dbName = databaseName.substring(1, databaseName.length()-1);	
     	}
     	
-    	public void insertTripleIntoDatabase () {
+    	public void insertTripleIntoDatabase (Connection c) {
     		   java.sql.Statement stmt = null;
     		   
     		   try {
@@ -810,7 +801,7 @@ public class AbstractSyntax {
     				   if(currentColumn < rowToInsert.length-1) insertStatement+= ", ";
     				   else insertStatement += ")";
     			   }
-    			   System.out.println(insertStatement);
+    			   //System.out.println(insertStatement);
     			   stmt.executeUpdate(insertStatement); 
     			   // commit the transaction
     			   c.commit();
@@ -822,7 +813,6 @@ public class AbstractSyntax {
     			   e.printStackTrace();
     		   } finally {
     			   try {
-    				   c.close();
     				   stmt.close();
     			   } catch (SQLException e) {
     				   System.err.println("Connection or statement could not be closed correctly");
@@ -834,18 +824,13 @@ public class AbstractSyntax {
     } //end of class
     
     public static class CreateDatabase extends Statement {
-    	private static String dbName;
-    	public static Connection c =null;
-    	public CreateDatabase (String dbName, String dbUrl, String name, String password) {
+    	private String dbName;
+    	public CreateDatabase (String dbName) {
     		this.dbName = dbName.substring(1, dbName.length()-1);
-    		System.out.println(dbName);
-    		// establish connection first
-    		System.out.println("DATA: DATA\n"+ this.dbName + "\n" + dbUrl + "\n" + name + "\n" + password);
-       		ConnectionToUrl connectionToUrl= new ConnectionToUrl (dbUrl, name, password);
-    		c = connectionToUrl.establishConnection();
+    		//System.out.println("DATA from CreateDatabase: DATA\n"+ this.dbName + "\n" + dbUrl + "\n" + name + "\n" + password);
     		}
     	
-    	public void createDatabase () {
+    	public void createDatabase (Connection c) {
     		java.sql.Statement stmt = null;
     		try {
     			stmt = c.createStatement();
@@ -872,7 +857,6 @@ public class AbstractSyntax {
     			try {
     				//connection.close();
     				stmt.close();
-    				c.close();
     			} catch (SQLException e) {
     				System.err.println("Connection or statement could not be closed correctly");
     				e.printStackTrace();
@@ -883,26 +867,21 @@ public class AbstractSyntax {
     }//end of class
 
     public static class DisplayEntireDatabase extends Statement {
-    	private static Connection c = null;
-    	private static String dbName;
-    	public DisplayEntireDatabase (String dbName, String dbUrl, String name, String password) {
+    	private  String dbName;
+    	public DisplayEntireDatabase (String dbName) {
     		this.dbName =dbName.substring(1, dbName.length()-1); //"cat_relations";
-    		// establish connection first
-    		System.out.println ("dbName, databaseurl, name, password\n" + this. dbName+"\n" + dbUrl + "\n" +  name +"\n" + password );
-       		ConnectionToUrl connectionToUrl= new ConnectionToUrl (dbUrl, name, password);
-    		c = connectionToUrl.establishConnection();
     		}
     	
- 	   public static void displayDatabase() {
- 		   //System.out.println(dbName + "\n " + );
- 		  String []columnNames = {"Subject", "Relationship", "Object"};//{"Cat_Name", "Relationship", "Other_Cat_Name"};
+ 	   public void displayDatabase(Connection c) {
+   		System.out.println ("dbName " + dbName );
+   	   
+ 		   String []columnNames = {"Subject", "Relationship", "Object"};//{"Cat_Name", "Relationship", "Other_Cat_Name"};
 		   ResultSet rs = null; // result set object
 		   java.sql.Statement stmt = null;
 		   try {
 			   stmt = c.createStatement(); 
-			 System.out.println("\nWe get to here and we crash after \n");
+			   System.out.println("gets here");
 			   rs = stmt.executeQuery(constructQuery(dbName, columnNames));
-			 System.out.println("\nWe get to here and we crash after \n");
 			   // iterate the result set and get one row at a time
 			   
 			   while (rs.next()) {
@@ -910,7 +889,7 @@ public class AbstractSyntax {
 					   String name = rs.getString(currentColumn+1); // 1st column in query
 
 					   System.out.print(columnNames[currentColumn] + " = " + name);
-					   System.out.print("  |  ");
+					   System.out.print("   |   ");
 				   }
 				   System.out.println("==========");
 			   }
@@ -918,7 +897,7 @@ public class AbstractSyntax {
 			   e.printStackTrace();
 		   } finally {
 			   try {
-				   c.close();
+				   //c.close();
 				   stmt.close();
 				   rs.close();
 			   } catch (SQLException e) {
@@ -942,6 +921,21 @@ public class AbstractSyntax {
 	   }
     } //end of class
 
+    public static class CloseConnection extends Statement {
+    	public CloseConnection () {}
+    	public void executeConnectionClosing(Connection connectionToBeClosed){
+    		Connection c = null;
+    		if(connectionToBeClosed != null) {
+    			try {
+    				connectionToBeClosed.close();
+    			} catch (SQLException e) {
+    				System.err.println("Connection or statement could not be closed correctly");
+    				e.printStackTrace();
+    			}
+    		}
+    		else System.out.println("Connection is allready closed");
+    	}
+    }
     /*
     public static class Skip extends Statement {
         public void display(int level) {

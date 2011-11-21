@@ -83,6 +83,7 @@ TOKEN:
   | < CREATEDATABASE:  "CreateDatabase">
   | < CREATE:    "create">
   | < INSERT:    "Insert">
+  | < CLOSECONNECTION: "CloseConnection">
   | < DED:       "DisplayEntireDatabase">
   | < SIGN:     "#">
   | < SHOWSTACK:   "showstack">
@@ -111,28 +112,33 @@ ConnectionToUrl connectionToUrl() :{Token database; Token userName; Token passwo
  {return new ConnectionToUrl(database.image.toString(), userName.image.toString(), password.image.toString());}
 }
 
+//database is always a triple with form subject, relationship, object
+CreateDatabase 	createDatabase() :{Token databaseName;}
+{
+ <CREATEDATABASE>  databaseName = <CLSTRING> 
+ {return new CreateDatabase(databaseName.image.toString());}
+}
+
 // insert a tripple; assume connection is established and we are adding to the current 
 // database
-Insert 	insert() :{Token databaseName; Token subject; Token relationship; Token object; Token database; Token userName; Token password;}
+Insert 	insert() :{Token databaseName; Token subject; Token relationship; Token object; }
 {
- <INSERT> databaseName = <CLSTRING> subject = <CLSTRING>  relationship = <CLSTRING> object = <CLSTRING> database = <CLSTRING>  userName = <CLSTRING>  password = <CLSTRING>
- {return new Insert(databaseName.image.toString(),subject.image.toString(), relationship.image.toString(), object.image.toString(), database.image.toString(), userName.image.toString(), password.image.toString());}
+ <INSERT> databaseName = <CLSTRING> subject = <CLSTRING>  relationship = <CLSTRING> object = <CLSTRING> 
+ {return new Insert(databaseName.image.toString(),subject.image.toString(), relationship.image.toString(), object.image.toString());}
 }
 
 //database is always a triple with form subject, relationship, object
-CreateDatabase 	createDatabase() :{Token databaseName; Token databaseUrl; Token userName; Token password;}
+DisplayEntireDatabase displayEntireDatabase() :{Token databaseName;}
 {
- <CREATEDATABASE>  databaseName = <CLSTRING> databaseUrl = <CLSTRING>  userName = <CLSTRING>  password = <CLSTRING>
- {return new CreateDatabase(databaseName.image.toString() ,databaseUrl.image.toString(), userName.image.toString(), password.image.toString());}
+ <DED>  databaseName = <CLSTRING>
+ {return new DisplayEntireDatabase(databaseName.image.toString());}
 }
 
-//database is always a triple with form subject, relationship, object
-DisplayEntireDatabase displayEntireDatabase() :{Token databaseName; Token databaseUrl; Token userName; Token password;}
+CloseConnection closeConnection() :{}
 {
- <DED>  databaseName = <CLSTRING> databaseUrl = <CLSTRING>  userName = <CLSTRING>  password = <CLSTRING>
- {return new DisplayEntireDatabase(databaseName.image.toString() ,databaseUrl.image.toString(), userName.image.toString(), password.image.toString());}
+ <CLOSECONNECTION>
+ {return new CloseConnection();}
 }
-
 // We are generously allowing the global variables to live.
 // Even though they deserve to DIE!
 
@@ -349,6 +355,7 @@ Statement statement() :
    | s = insert() {return s;}
    | s = createDatabase() {return s;}
    | s = displayEntireDatabase() {return s;}
+   | s = closeConnection(){return s;}
 }
 
 /*
