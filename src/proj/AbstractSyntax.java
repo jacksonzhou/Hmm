@@ -742,6 +742,8 @@ public class AbstractSyntax {
     
     public static class ConnectionToUrl extends Statement {
     	String databaseUrl; String username; String password;
+
+        public static Connection conn;
     	//Connection conn = null;
     	 public ConnectionToUrl (String dbUrl, String usrnm, String psswd) {
     	// do something in here	
@@ -757,6 +759,7 @@ public class AbstractSyntax {
       	/* Given the URL, userName and password, this method will establish
       	 * a connection with the database at the given database URL,
       	 */
+      	public Connection disconnect() {	     	  
       	public Connection establishConnection() {	     	  
       		System.out.println("Current data: \ndatabaseUrl " + databaseUrl + 
     			  "\nUserName " + username+ "\nPassword "  + password);
@@ -765,10 +768,9 @@ public class AbstractSyntax {
     	databaseUrl = "jdbc:oracle:thin:@rising-sun.microlab.cs.utexas.edu:1521:orcl";
    		username = "cs345_18";
     	password = "orcl_7857"; 
-    	Connection conn = null;
     	try {
-			Class.forName(driver);
-					conn = DriverManager.getConnection(databaseUrl, username, password);
+		Class.forName(driver);
+		conn = DriverManager.getConnection(databaseUrl, username, password);
     	} catch (ClassNotFoundException e) {
 			System.out.println("Connection not established. Msg from AbstractSyntax.\n");
 			e.printStackTrace();
