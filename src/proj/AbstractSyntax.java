@@ -843,7 +843,6 @@ public class AbstractSyntax {
     		System.out.println("DATA: DATA\n"+ this.dbName + "\n" + dbUrl + "\n" + name + "\n" + password);
        		ConnectionToUrl connectionToUrl= new ConnectionToUrl (dbUrl, name, password);
     		c = connectionToUrl.establishConnection();
-    		createDatabase();
     		}
     	
     	public void createDatabase () {

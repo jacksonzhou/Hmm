@@ -199,7 +199,8 @@ public class Interpreter {
         
         if (s instanceof CreateDatabase) {
 
-            // We need to indicate that we return from the method:
+        	((CreateDatabase)s).createDatabase();
+
             return true;
         }
         if (s instanceof DisplayEntireDatabase) {
