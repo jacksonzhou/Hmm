@@ -1,10 +1,7 @@
-// modified by Melissa Olson, Tanmaya Godbole, and Sriratana Sutasirisap - Spring 2011
-
 package proj;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import proj.AbstractSyntax.*;
 import proj.AbstractSyntax.Variable.VarType;
@@ -20,10 +17,6 @@ public class Interpreter {
     private Variable[] debugStack;
     private int basePtr;
 
-    private RuntimeStack runtimeStack;
-
-    private Program prog;
-
     // Avoid passing id down caller chain!
     //private Lambda curLambda;
 
@@ -35,16 +28,16 @@ public class Interpreter {
         if (debug) {
             debugStack = new Variable[STACK_SIZE];
         }
-
-        runtimeStack = new RuntimeStack();
     }
     
     private void printLastStackFrame()
     {
+        System.out.println("BasePtr = " + basePtr + ", printing last stack frame (+" + STACK_PRINT_CONST + "): ");
         for (int i = basePtr; i < basePtr + STACK_PRINT_CONST; i++) {
             if (debugStack != null) {
                 System.out.print(debugStack[i] + ": ");
             }
+            System.out.println(stack[i]);
         }
     }
 
@@ -53,21 +46,16 @@ public class Interpreter {
     public void runProgram(Program prog)
         throws InterpreterRuntimeError
     {
-	this.prog = prog; //added later
         evaluateDeclarations(prog.getGlobals());
-       
         // Shift the Base Pointer to the end of Globals:
         basePtr = prog.getNumGlobals();
+        System.out.println("GLOBALS ARE: " +basePtr);
         
         // Find the 'main' function and run it!
         Function main = Util.findFunction(prog.getFunctions(), "main");
         if (main == null) {
             throw new InterpreterRuntimeError(-1, MAIN_NOT_FOUND);
-        }     
-
-        //jz adding new stack stuff
-        runtimeStack.addRecord(new ActivationRecord("main"));
-
+        }   
         runStatement(main.getBody());
     }
 
@@ -78,13 +66,6 @@ public class Interpreter {
         Value result = null;
         
         basePtr += call.getStackOffset();
-
-        //jz just create and add a new activation record here
-        ActivationRecord ar = new ActivationRecord(call.getFunction().getName());
-        //jz just create and add a new activation record here
-        //jz add new record to the stack
-        runtimeStack.addRecord(ar);
-        //jz add new record to the stack
         
         List<Declaration> params = call.getFunction().getParams();
         
@@ -94,18 +75,14 @@ public class Interpreter {
         }
         
         for (int i = 0, size = args.size(); i < size; i++) {
-            setVarValue(params.get(i).getVariable(), args.get(i)); //need to worry about this!
-
-            /*
-            //jz add everything to that activation record
-            ar.addVarValue(params.get(i).getVariable(), args.get(i));
-            //jz add everything to that activation record
-            */
+            setVarValue(params.get(i).getVariable(), args.get(i));
         }
-
+        
+        // Now, execute the actual Function body:
         runStatement(call.getFunction().getBody());
         
         if (debug) {
+            System.out.println("Exiting function: " + call.getFunction().getName());
             printLastStackFrame();
         }
         
@@ -118,72 +95,8 @@ public class Interpreter {
             }
         }
 
-        //jz next thing pop off
-        runtimeStack.removeRecord();
-        //jz next thing pop off
-
         basePtr -= call.getStackOffset();
-        return result; //this result corresponds to the result of the actualy function you're calling
-    }
-    // added later by MST - binds the values of argumenst to the parameters, and runs the body of the constructor
-    public void callConstructor(Constructor c, List<Value> args) throws InterpreterRuntimeError 
-    {
-	List<Declaration> params = c.getParams();
-
-	if (args.size() != params.size()) {
-            throw new InterpreterRuntimeError(c.getLineNum(), INV_NUM_ARGS, 
-                    "constructor" , params.size(), args.size());
-        }
-
-	for (int i = 0, size = args.size(); i < size; i++) {
-            setVarValue(params.get(i).getVariable(), args.get(i)); //need to worry about this!
-        }
-       runStatement(c.getBody());
-    }
-    
-    // added later by MST - gets the Function from the object function, then executes the function.
-    public Value callOOFunction(ObjFunction objFunc, List<Value> args) throws InterpreterRuntimeError
-    {
-        MyClass c = Util.findClass(prog.getClasses(), objFunc.getClassName());
-        Function f = null;
-        List<Function> fList = c.getFunctions();
-        for(Function func : fList){
-           if(func.getName().equals(objFunc.getFuncName()))
-              f = func;
-         } 
-        Value result = null;   
-        basePtr += objFunc.getStackOffset();
-        if(f == null)
-          throw new InterpreterRuntimeError(objFunc.getLineNum(), UNDEF_FUNCTION, "object function");
-        
-        
-        List<Declaration> params = f.getParams();
-        
-        if (args.size() != params.size()) {
-            throw new InterpreterRuntimeError(objFunc.getLineNum(), INV_NUM_ARGS, 
-                    f.getName(), params.size(), args.size());
-        }
-        
-        for (int i = 0, size = args.size(); i < size; i++) {
-            setVarValue(params.get(i).getVariable(), args.get(i)); //need to worry about this!
-        }
-        
-        // Now, execute the actual Function body:
-        runStatement(f.getBody());
-        
-        // NOTE: By convention, the return value shall be assigned the FIRST address:
-        if (f.isVoid() == false) {
-        	Declaration returnDec = f.getReturnDecl();
-        	Variable v = returnDec.getVariable();
-        	int address = v.getAddress();
-            	result = stack[basePtr + address];
-            	if (result == null) {
-                	throw new InterpreterRuntimeError(objFunc.getLineNum(), 
-                        FUNCTION_DID_NOT_RETURN_VALUE, f.getName());
-            }
-        } 
-        basePtr -= objFunc.getStackOffset();
-        return result; //this result corresponds to the result of the actualy function you're calling
+        return result;
     }
 
     /**
@@ -272,13 +185,7 @@ public class Interpreter {
             	Value val = runExpression(ret.getResult());
             	// NOTE: Static check is expected to fully
             	// cover the function return value;
-
-                //jz this is the old thing, don't use it in the new model 
             	setVarValue(ret.getTarget(), val);
-
-                //jz return value set
-                runtimeStack.getRecord().setReturn(val);
-                //jz return value set
             }
             // We need to indicate that we return from the method:
             return true;
@@ -290,6 +197,16 @@ public class Interpreter {
             return true;
         }
         
+        if (s instanceof CreateDatabase) {
+
+            // We need to indicate that we return from the method:
+            return true;
+        }
+        if (s instanceof Insert) {
+        	((Insert)s).insertTripleIntoDatabase();
+            // We need to indicate that we return from the method:
+            return true;
+        }
         if (s instanceof DeclContainer) {
             // We need to evaluate the expressions in the declarations, 
             // and also reserve the stack locations for these variables.
@@ -334,26 +251,12 @@ public class Interpreter {
             }
             return false;
         }
-        // added later by MST to run the instantiation of a class
-	if (s instanceof MyObject) {
-	    MyObject obj = (MyObject)s;
-	    MyClass c = Util.findClass(prog.getClasses(), obj.getType());
-	    Constructor cons = c.getConstructor();
-	    List<Value> args = evaluateExpList(obj.getArgs());
-	    callConstructor(cons, args);
-	    return false; //dummy return
-	}
 
         /*
         if (s instanceof Skip) {
             return false;
         }
         */
-        if (s instanceof ShowStack) {
-            System.out.println("PRINTING STACK AT " + ((ShowStack)s).id);
-            runtimeStack.printStack();
-            return false;
-        }
 
         throw new UnsupportedOperationException(
                 "Unrecognized Statement class: " + s.getClass());
@@ -430,13 +333,13 @@ public class Interpreter {
             
             Call call = (Call) exp;
             List<Value> args = evaluateExpList(call.getArgs());
-            BuiltinFunctions.Name bfName = call.getBuiltinFunctName();        
+            BuiltinFunctions.Name bfName = call.getBuiltinFunctName();
+            
             if (bfName != null) {
                 return BuiltinFunctions.run(bfName, args);
             } else if (call.getFunction() != null) {
-                //jz create AR here and pass it in?
                 return callRealFunction(call, args);
-	    } else {
+            } else {
                 LambdaValue lambdaVal;
                 String name;
                 if (call.getLambda() != null) {
@@ -447,17 +350,9 @@ public class Interpreter {
                 } else {
                     // Fetch the Lambda value from the Variable:
                     Value val = getVarValue(call.getVar());
-		    if(val instanceof FuncArgValue){ //added later
-			FuncArgValue newVal = (FuncArgValue)val;
-			Function methodToCall = Util.findFunction(prog.getFunctions(), newVal.getMethodName());
-			//did not check if parameters and return value match...should give runtime errors if there is a mismatch
-			//call.setFunction(methodToCall, 0);
-			call.setFunctWithoutOffset(methodToCall);
-			return callRealFunction(call, args);
-	 	    }
-                    else if (val instanceof LambdaValue == false) {
+                    if (val instanceof LambdaValue == false) {
                         throw new InterpreterRuntimeError(
-                                call.getLineNum(), EXPECTING_LAMBDA, val); //added later - this is what's causing the runtime error
+                                call.getLineNum(), EXPECTING_LAMBDA, val);
                     }
                     lambdaVal = (LambdaValue)val;
                     name = call.getVar().getName();
@@ -486,22 +381,7 @@ public class Interpreter {
                 return result;            
             }
         }
-	
-        // added later by MST - to run the first class function
-	if(exp instanceof FuncArg){
-		FuncArg funcArg = (FuncArg) exp;
-	        FuncArgValue val = new FuncArgValue(funcArg.getName(), funcArg.getArgs());
-		return val; 
-	}
-	
-        // added later by MST - to run the object function
-	if (exp instanceof ObjFunction) {
-	    ObjFunction of = (ObjFunction)exp;
-	    List<Expression> unevaluated = of.getArgs();
-	    List<Value> args = evaluateExpList(unevaluated);
-	    return callOOFunction(of, args);
-	}
-	
+
         throw new UnsupportedOperationException(
                 "Found invalid expression class: " + exp.getClass());
     }
@@ -540,7 +420,7 @@ public class Interpreter {
 
         if (exp instanceof ListTupleReference) {
             ListTupleReference ref = (ListTupleReference)exp;
-            // We just separately init. list variable and the index expression:
+            // We just separaetely init. list variable and the index expression:
             initLambdaContext(ref.getListVar(), inOutCtx);
             initLambdaContext(ref.getIndex(), inOutCtx);
             return;
@@ -737,39 +617,20 @@ public class Interpreter {
     }
 
     public void setVarValue(Variable var, Value value) {
-        int address = var.getAddress();    
-        
+        int address = var.getAddress();
+
         switch (var.getVarType()) {
         case GLOBAL:
             if (debug) {
                 debugStack[address] = var;
             }
             stack[address] = value;
-
-            //jz new stack stuff here
-            runtimeStack.setGlobal(var, value);
-            //jz new stack stuff here
-
             return;
         case LOCAL:
             if (debug) {
                 debugStack[basePtr + address] = var;
             }
             stack[basePtr + address] = value;
-
-            //jz new stack stuff here
-            ActivationRecord currentRecord = runtimeStack.getRecord();
-            if(currentRecord == null){
-                System.out.println("try to add local to ar, stack returned null");
-                System.out.println(var.toString() + value.toString());
-            }
-            currentRecord.addVarValue(var, value);
-            //jz new stack stuff here
-            return;
-
-        // added later by MST - to take care of instance variables 
-	case INSTANCE: 
-	    stack[basePtr + address] = value; 
             return;
         case LAMBDA:
             LambdaValue lastLambda = lambdaStack.get(lambdaStack.size() - 1);
@@ -780,7 +641,6 @@ public class Interpreter {
                     + var.getVarType());
         }
     }
-    
 
     public Value getVarValue(Variable var) 
         throws InterpreterRuntimeError
@@ -788,39 +648,16 @@ public class Interpreter {
         int address = var.getAddress();
         Value val;
 
-        /* hack to make globals work like
-
-           int j = l; //where l is another global
-
-           before it just crashed since getType was null and you 
-           tried to switch on it; even if it's hacky, theres no loss atm
-           bad original architecture though :(
-        */
-        if(var.getVarType() == null){
-            //if type is null, assume Global
-            var.setVarType(Variable.VarType.GLOBAL);
-        }
-
         switch (var.getVarType()) {
         case GLOBAL:
-            //jz old thing, I'm ripping it out
-            //val =  stack[address];
-            //jz old thing, I'm ripping it out
-            val = runtimeStack.getGlobal(var);
+            val =  stack[address];
             break;
         case LOCAL:
-            //jz old thing, I'm ripping it out
-            //val =  stack[basePtr + address];
-            //jz old thing, I'm ripping it out
-            val =  runtimeStack.getRecord().getVarValue(var);
+            val =  stack[basePtr + address];
             break;
         case LAMBDA:
             LambdaValue lastLambda = lambdaStack.get(lambdaStack.size() - 1);
             val = lastLambda.getCtxValue(address);
-            break;
-        // added later by MST - to take care of instance variables
-        case INSTANCE:
-            val = stack[basePtr + address];
             break;
         default:
             throw new UnsupportedOperationException("Invalid Var Type: "

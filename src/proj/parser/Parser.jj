@@ -113,10 +113,10 @@ ConnectionToUrl connectionToUrl() :{Token database; Token userName; Token passwo
 
 // insert a tripple; assume connection is established and we are adding to the current 
 // database
-Insert 	insert() :{Token subject; Token relationship; Token object; Token database; Token userName; Token password;}
+Insert 	insert() :{Token databaseName; Token subject; Token relationship; Token object; Token database; Token userName; Token password;}
 {
- <INSERT> subject = <CLSTRING>  relationship = <CLSTRING> object = <CLSTRING> database = <CLSTRING>  userName = <CLSTRING>  password = <CLSTRING>
- {return new Insert(subject.image.toString(), relationship.image.toString(), object.image.toString(), database.image.toString(), userName.image.toString(), password.image.toString());}
+ <INSERT> databaseName = <CLSTRING> subject = <CLSTRING>  relationship = <CLSTRING> object = <CLSTRING> database = <CLSTRING>  userName = <CLSTRING>  password = <CLSTRING>
+ {return new Insert(databaseName.image.toString(),subject.image.toString(), relationship.image.toString(), object.image.toString(), database.image.toString(), userName.image.toString(), password.image.toString());}
 }
 
 //database is always a triple with form subject, relationship, object
