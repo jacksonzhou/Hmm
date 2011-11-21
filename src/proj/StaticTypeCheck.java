@@ -160,6 +160,11 @@ public class StaticTypeCheck
 	        if (s instanceof CreateDatabase) {
 	        	return;
 	        }
+
+	        if (s instanceof DisplayEntireDatabase) {
+	        	return;
+	        }
+
 	        if (s instanceof DeclContainer) {
 	        	List<Declaration> decList = ((DeclContainer)s).getDeclarations();
 	        	

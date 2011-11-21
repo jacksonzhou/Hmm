@@ -892,7 +892,6 @@ public class AbstractSyntax {
     		System.out.println ("dbName, databaseurl, name, password\n" + this. dbName+"\n" + dbUrl + "\n" +  name +"\n" + password );
        		ConnectionToUrl connectionToUrl= new ConnectionToUrl (dbUrl, name, password);
     		c = connectionToUrl.establishConnection();
-    		displayDatabase();
     		}
     	
  	   public static void displayDatabase() {

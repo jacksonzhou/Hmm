@@ -202,6 +202,10 @@ public class Interpreter {
             // We need to indicate that we return from the method:
             return true;
         }
+        if (s instanceof DisplayEntireDatabase) {
+        	((DisplayEntireDatabase)s).displayDatabase();
+        	return true;
+        }
         if (s instanceof Insert) {
         	((Insert)s).insertTripleIntoDatabase();
             // We need to indicate that we return from the method:
