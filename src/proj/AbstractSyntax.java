@@ -784,13 +784,20 @@ public class AbstractSyntax {
     public static class Insert extends Statement {
     	private String []rowToInsert = new String [3]; //has format [subject, relatiohship, object]
     	private String dbName;
-    	
-    	public Insert (String databaseName ,String subject, String relationship, String object) {
-    		rowToInsert[0] = subject.substring(1, subject.length()-1);
-    		rowToInsert[1] = relationship.substring(1, relationship.length()-1);
-    		rowToInsert[2] = object.substring(1, object.length()-1);
+        public Triple triple;
+
+    	public Insert (String databaseName, Triple triple) {
     		dbName = databaseName.substring(1, databaseName.length()-1);	
+                this.triple = triple;
     	}
+
+        public void test(){
+            System.out.println("RECOGNIZED RECOGNIZED");
+            System.out.println(dbName);
+            System.out.println("-------------");
+            System.out.println(this.triple);
+            System.out.println("RECOGNIZED RECOGNIZED");
+        }
     	
     	public void insertTripleIntoDatabase (Connection c) {
     		   java.sql.Statement stmt = null;
@@ -1198,6 +1205,26 @@ public class AbstractSyntax {
             }
             
             return new FunctionType(paramTypes, BaseType.OBJECT);
+        }
+    }
+
+    public static class Triple extends Statement {
+        public Expression subject;
+        public Expression predicate;
+        public Expression object;
+
+        public Triple(Expression subject,
+                      Expression predicate,
+                      Expression object){
+            this.subject = subject;
+            this.predicate = predicate;
+            this.object = object;
+        }
+        
+        public String toString(){
+            return "Subject: " + subject + "\n" +
+            "Pred: " + predicate + "\n" +
+            "Object: " + object + "\n";
         }
     }
 
@@ -1693,6 +1720,11 @@ public class AbstractSyntax {
         public VarType getVarType()
         {
             return varType;
+        }
+
+        public void setVarType(VarType varType)
+        {
+            this.varType = varType;
         }
         
         public int getAddress()

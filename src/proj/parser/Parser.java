@@ -11,6 +11,19 @@ public class Parser implements ParserConstants {
     private Type   curTopLevelType;
     private Token  curTopLevelToken;
 
+  final public Triple triple() throws ParseException {
+ Expression subject; Expression predicate; Expression object;
+    jj_consume_token(LPAREN);
+    subject = primary();
+    jj_consume_token(COMMA);
+    predicate = primary();
+    jj_consume_token(COMMA);
+    object = primary();
+    jj_consume_token(RPAREN);
+      {if (true) return new Triple(subject, predicate, object);}
+    throw new Error("Missing return statement in function");
+  }
+
   final public ConnectionToUrl connectionToUrl() throws ParseException {
                                     Token database; Token userName; Token password;
     jj_consume_token(CONNECT);
@@ -33,13 +46,11 @@ public class Parser implements ParserConstants {
 // insert a tripple; assume connection is established and we are adding to the current 
 // database
   final public Insert insert() throws ParseException {
-                   Token databaseName; Token subject; Token relationship; Token object;
+                   Token databaseName; Triple myTriple;
     jj_consume_token(INSERT);
     databaseName = jj_consume_token(CLSTRING);
-    subject = jj_consume_token(CLSTRING);
-    relationship = jj_consume_token(CLSTRING);
-    object = jj_consume_token(CLSTRING);
-  {if (true) return new Insert(databaseName.image.toString(),subject.image.toString(), relationship.image.toString(), object.image.toString());}
+    myTriple = triple();
+  {if (true) return new Insert(databaseName.image.toString(), myTriple);}
     throw new Error("Missing return statement in function");
   }
 
@@ -1572,44 +1583,6 @@ public class Parser implements ParserConstants {
     finally { jj_save(13, xla); }
   }
 
-  private boolean jj_3R_52() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_9()) {
-    jj_scanpos = xsp;
-    if (jj_3_10()) {
-    jj_scanpos = xsp;
-    if (jj_3_11()) {
-    jj_scanpos = xsp;
-    if (jj_3_12()) {
-    jj_scanpos = xsp;
-    if (jj_3R_64()) {
-    jj_scanpos = xsp;
-    if (jj_3_13()) {
-    jj_scanpos = xsp;
-    if (jj_3R_65()) {
-    jj_scanpos = xsp;
-    if (jj_3R_66()) return true;
-    }
-    }
-    }
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3_9() {
-    if (jj_3R_31()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_70() {
-    if (jj_scan_token(BANG)) return true;
-    return false;
-  }
-
   private boolean jj_3R_69() {
     if (jj_scan_token(MINUS)) return true;
     return false;
@@ -2061,6 +2034,44 @@ public class Parser implements ParserConstants {
 
   private boolean jj_3_10() {
     if (jj_3R_32()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_52() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_9()) {
+    jj_scanpos = xsp;
+    if (jj_3_10()) {
+    jj_scanpos = xsp;
+    if (jj_3_11()) {
+    jj_scanpos = xsp;
+    if (jj_3_12()) {
+    jj_scanpos = xsp;
+    if (jj_3R_64()) {
+    jj_scanpos = xsp;
+    if (jj_3_13()) {
+    jj_scanpos = xsp;
+    if (jj_3R_65()) {
+    jj_scanpos = xsp;
+    if (jj_3R_66()) return true;
+    }
+    }
+    }
+    }
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3_9() {
+    if (jj_3R_31()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_70() {
+    if (jj_scan_token(BANG)) return true;
     return false;
   }
 

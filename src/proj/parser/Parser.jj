@@ -106,6 +106,13 @@ TOKEN:
     <ERROR: ~[] >
 }
 
+Triple triple():
+{Expression subject; Expression predicate; Expression object;}
+{
+    <LPAREN> subject = primary()<COMMA> predicate = primary()<COMMA> object = primary()<RPAREN>
+    { return new Triple(subject, predicate, object);}
+}
+
 ConnectionToUrl connectionToUrl() :{Token database; Token userName; Token password;}
 {
  <CONNECT> database = <CLSTRING>  userName = <CLSTRING>  password = <CLSTRING>
@@ -121,10 +128,10 @@ CreateDatabase 	createDatabase() :{Token databaseName;}
 
 // insert a tripple; assume connection is established and we are adding to the current 
 // database
-Insert 	insert() :{Token databaseName; Token subject; Token relationship; Token object; }
+Insert 	insert() :{Token databaseName; Triple myTriple;}
 {
- <INSERT> databaseName = <CLSTRING> subject = <CLSTRING>  relationship = <CLSTRING> object = <CLSTRING> 
- {return new Insert(databaseName.image.toString(),subject.image.toString(), relationship.image.toString(), object.image.toString());}
+ <INSERT> databaseName = <CLSTRING> myTriple = triple() 
+ {return new Insert(databaseName.image.toString(), myTriple);}
 }
 
 //database is always a triple with form subject, relationship, object
