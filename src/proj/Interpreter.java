@@ -309,15 +309,21 @@ public class Interpreter {
                 
             i.test();
 
+            i.triple.subject = runExpression(i.triple.subject);
+            i.triple.predicate = runExpression(i.triple.predicate);
+            i.triple.object = runExpression(i.triple.object);
+
+            /*
             if(i.triple.subject instanceof Call){
                 System.out.println("this happened");
-                List<Value> args = evaluateExpList(((Call)i.triple.subject).getArgs());
-                System.out.println(((Call)i.triple.subject).getFunction() != null);
+                Value v = runExpression((Call)i.triple.subject);
+                System.out.println(v);
                 if(((Call)i.triple.subject).getFunction() != null){
                     System.out.println("this happened");
                     i.triple.subject = callRealFunction((Call)i.triple.subject, args);
                 }
             }
+            */
 
             i.test();
 
@@ -469,15 +475,20 @@ public class Interpreter {
         }
 
         if (exp instanceof Call) {
+            System.out.println("!!!!!!!");
             
             Call call = (Call) exp;
             List<Value> args = evaluateExpList(call.getArgs());
             BuiltinFunctions.Name bfName = call.getBuiltinFunctName();        
+            System.out.println("got this far");
+            System.out.println(call);
+            System.out.println(call.getFunction());
             if (bfName != null) {
                 return BuiltinFunctions.run(bfName, args);
             } else if (call.getFunction() != null) {
-                //jz create AR here and pass it in?
-                return callRealFunction(call, args);
+                Value v = callRealFunction(call, args); 
+                System.out.println(v);
+                return v;
 	    } else {
                 LambdaValue lambdaVal;
                 String name;
@@ -780,7 +791,7 @@ public class Interpreter {
 
     public void setVarValue(Variable var, Value value) {
         int address = var.getAddress();    
-        
+
         switch (var.getVarType()) {
         case GLOBAL:
             if (debug) {
@@ -830,18 +841,12 @@ public class Interpreter {
         int address = var.getAddress();
         Value val;
 
-        /* hack to make globals work like
-
-           int j = l; //where l is another global
-
-           before it just crashed since getType was null and you 
-           tried to switch on it; even if it's hacky, theres no loss atm
-           bad original architecture though :(
+        /* hack to make varTypes work right 
         */
         if(var.getVarType() == null){
-            //if type is null, assume Global
-            var.setVarType(Variable.VarType.GLOBAL);
+            var.setVarType(Variable.VarType.LOCAL);
         }
+        
 
         switch (var.getVarType()) {
         case GLOBAL:

@@ -394,6 +394,7 @@ public class StaticTypeCheck
                 // Ok, if it's not a variable, try a function:
                 Function funct = symbolTable.findFunction(name);
                 if (funct == null) {
+                    System.out.println("BLAAAAAHHHHHH");
                     logger.error(call.getLineNum(), UNDEF_FUNCTION, name);
                     return null;
                 }
