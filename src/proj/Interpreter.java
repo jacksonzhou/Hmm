@@ -421,6 +421,22 @@ public class Interpreter {
     }
 
     public Value runExpression(Expression exp) throws InterpreterRuntimeError {
+        if (exp instanceof Select) {
+
+            Select s = (Select)exp; 
+
+            s.triple.subject = runExpression(s.triple.subject);
+            s.triple.predicate = runExpression(s.triple.predicate);
+            s.triple.object = runExpression(s.triple.object);
+
+            System.out.println(s.makeQuery());
+            return s.eval(staticConnection);
+        }
+
+        if (exp instanceof WildCard) {
+            return (Value) ((WildCard)exp).getValue();
+        }
+
         if (exp instanceof Value) {
             return (Value) exp;
         }

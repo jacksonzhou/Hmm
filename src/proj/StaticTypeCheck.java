@@ -157,6 +157,10 @@ public class StaticTypeCheck
 	        	return;
 	        }
 
+	        if (s instanceof Select) {
+	        	return;
+	        }
+
 	        if (s instanceof ShowStack) {
 	        	return;
 	        }
@@ -274,6 +278,11 @@ public class StaticTypeCheck
 	            return BaseType.OBJECT;
 	        }
 	
+	        if (exp instanceof Select) {
+	        	//return (lte.isTuple()) ? BaseType.TUPLE : BaseType.LIST;
+	        	return BaseType.TUPLE;
+	        }
+
 	        if (exp instanceof ListTupleExpression) {
 	        	ListTupleExpression lte = (ListTupleExpression)exp;
 	        	checkExpressions(lte.getMembers());

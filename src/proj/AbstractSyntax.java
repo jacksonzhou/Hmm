@@ -780,10 +780,10 @@ public class AbstractSyntax {
     	return conn;
       	}
     }//end of class
-    
+
     public static class Insert extends Statement {
     	private String []rowToInsert = new String [3]; //has format [subject, relatiohship, object]
-    	private String dbName;
+    	public String dbName;
         public Triple triple;
 
     	public Insert (String databaseName, Triple triple) {
@@ -964,6 +964,97 @@ public class AbstractSyntax {
 		   return query;
 	   }
     } //end of class
+    
+    public static class Select extends Expression {
+    	public String dbName;
+        public Triple triple;
+
+        public Select (String databaseName, Triple triple){
+            this.dbName = databaseName.substring(1, databaseName.length()-1);
+            this.triple = triple;
+        }
+
+        public void doQuery(Connection c){
+    	    java.sql.Statement stmt = null;
+            ResultSet rs = null;
+
+            try{
+    	        stmt = c.createStatement();
+                rs = stmt.executeQuery(makeQuery());
+
+ 		String []columnNames = {"Subject", "Relationship", "Object"};//{"Cat_Name", "Relationship", "Other_Cat_Name"};
+                //do stuff here
+                while (rs.next()) {
+                       for (int currentColumn = 0; currentColumn < columnNames.length; currentColumn++) {
+                               String name = rs.getString(currentColumn+1); // 1st column in query
+
+                               System.out.print(columnNames[currentColumn] + " = " + name);
+                               System.out.print("   |   ");
+                       }
+                       System.out.println("==========");
+                }
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+            finally{
+                try{
+                    stmt.close();
+                    rs.close();
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public Value eval(Connection c){
+
+            doQuery(c);
+
+            return new TupleValue(null);
+        }
+
+        public String makeQuery(){
+            //String []columnNames = {"Subject", "Relationship", "Object"};//{"Cat_Name", "Relationship", "Other_Cat_Name"};
+            StringBuilder q = new StringBuilder();
+            q.append("SELECT * FROM ");
+            q.append(dbName);
+            q.append(" WHERE ");
+
+            HashMap<String, String> fixed = new HashMap<String,String>();
+
+            if(!(triple.subject instanceof WildValue)){
+                fixed.put("Subject", ((StringValue)triple.subject).toString());
+            }
+            if(!(triple.predicate instanceof WildValue)){
+                fixed.put("Relationship", ((StringValue)triple.predicate).toString());
+            }
+            if(!(triple.object instanceof WildValue)){
+                fixed.put("Object", ((StringValue)triple.object).toString());
+            }
+
+            int count = 0;
+            for(String s : fixed.keySet()){
+                if(count != 0){
+                    q.append(" AND ");
+                }
+                q.append(s);
+                q.append(" = ");
+                q.append("'");
+                q.append(fixed.get(s));
+                q.append("'");
+                ++count;
+            }
+
+            return q.toString();
+        }
+
+        public int getLineNum(){
+            return 1;
+        }
+
+    }
 
     public static class CloseConnection extends Statement {
     	public CloseConnection () {}
@@ -1260,6 +1351,24 @@ public class AbstractSyntax {
             System.out.println(l);
             System.out.println(r);
         }
+    }
+
+    public static class WildCard extends Expression {
+        public String image;
+
+        public WildCard(String s){
+            image = s;
+            System.out.println("Found Wild: " + image);
+        }
+
+        public WildValue getValue(){
+            return new WildValue(image);
+        }
+
+        public int getLineNum(){
+            return 1;
+        }
+
     }
 
     public static class Triple extends Statement {
@@ -2069,6 +2178,23 @@ public class AbstractSyntax {
     }
 
     
+    public static class WildValue extends Value {
+        private final String value;
+
+        public BaseType getType() {
+            return BaseType.STRING;
+        }
+
+        public WildValue(String str)
+        {
+            value = str;
+        }
+
+        public String getValue()
+        {
+            return value; 
+        }
+    }
     public static class StringValue extends Value {
         private final String value;
 

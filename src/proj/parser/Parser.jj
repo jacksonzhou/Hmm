@@ -84,10 +84,12 @@ TOKEN:
   | < CREATEDATABASE:  "CreateDatabase">
   | < CREATE:    "create">
   | < INSERT:    "Insert">
+  | < SELECT:    "Select">
   | < CLOSECONNECTION: "CloseConnection">
   | < DED:       "DisplayEntireDatabase">
   | < SIGN:     "#">
   | < SHOWSTACK:   "showstack">
+  | < WILD:   "?" (["a"-"z"])+>
   
 }
 
@@ -105,6 +107,13 @@ TOKEN:  /* Literals */
 TOKEN:
 {
     <ERROR: ~[] >
+}
+
+WildCard wildCard():
+{Token t;}
+{
+    t = <WILD>
+    {return new WildCard(t.image.toString());}
 }
 
 StringCat stringCat():
@@ -147,6 +156,13 @@ Insert 	insert() :{Token databaseName; Triple myTriple;}
 {
  <INSERT> databaseName = <CLSTRING> myTriple = triple() 
  {return new Insert(databaseName.image.toString(), myTriple);}
+}
+
+Select select():
+{Token databaseName; Triple myTriple;}
+{
+    <SELECT> databaseName = <CLSTRING> myTriple = triple()
+    {return new Select(databaseName.image.toString(), myTriple);}
 }
 
 //database is always a triple with form subject, relationship, object
@@ -585,13 +601,15 @@ Expression primary() :
 {
    LOOKAHEAD(3) e = callOrLambda()    { return e; }
   | LOOKAHEAD(3) e = stringCat()      { return e; }
-  | LOOKAHEAD(3) e = funcArg()	       { return e; } //added by MST - allows a first class function to be passed as an argument, stored in a variable, or returned
-  | LOOKAHEAD(3) e = objFunc()     { return e; } //added by MST - allows you to call a method in a class and assign that value to a variable, etc.
+  | LOOKAHEAD(3) e = funcArg()	      { return e; } //added by MST - allows a first class function to be passed as an argument, stored in a variable, or returned
+  | LOOKAHEAD(3) e = objFunc()        { return e; } //added by MST - allows you to call a method in a class and assign that value to a variable, etc.
   | LOOKAHEAD(2) e = identifierOrArrayRef()         { return e; }
   | e = literal()                      { return e; }
   | LOOKAHEAD(2) t = <LBRACE> <RBRACE> { return ListTupleExpression.emptyList(t.beginLine); }
   | e = subExpressionOrTuple()         { return e; }
   | e = listOrListComprehension()      { return e; }
+  | e = wildCard()                     { return e; }
+  | e = select()                     { return e; }
   
   
 /* TODO: Figure out the cast:   | type() <LPAREN> e = expression() <RPAREN>           { return e; } */
