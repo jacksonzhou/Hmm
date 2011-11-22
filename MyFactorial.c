@@ -3,7 +3,7 @@ int factorial(int n) {
    int x; 
 
    if(n < 1) { 
-      showstack "hello world";
+       showstack "break1";
       return 1; 
    } 
    else 
@@ -16,6 +16,6 @@ int main() {
    int number, answer; 
    number = 5; 
    answer = factorial(number); 
-   showstack "end of recursion";
+   showstack "break 2";
    print(answer); 
 } 

@@ -1,6 +1,5 @@
 int j = 3;
 int k = 3 + 3;
-int l = j;
 
 int main ( ) {
     int main2 = test(3);

@@ -40,6 +40,7 @@ public class ActivationRecord{
         for(Variable var : varValues.keySet()){
             temp += "var: " + var.toString() +
                     "   val: " + ((varValues.get(var) != null ) ? varValues.get(var).toString() : "null") +
+                    //"   type: " + ((varValues.get(var) != null ) ? (varValues.get(var)).getClass().getName() : "null") +
                     "\n";
         }
 
