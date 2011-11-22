@@ -326,6 +326,7 @@ public class Interpreter {
             */
 
             i.test();
+            i.doInsert(staticConnection);
 
             return false;
         }
@@ -454,6 +455,19 @@ public class Interpreter {
             
             return (ltExp.isTuple()) ? new TupleValue(valMembers) :  
                 new ListValue(valMembers);
+        }
+
+        if (exp instanceof StringCat) {
+            StringCat temp = (StringCat)exp;
+
+            temp.l = runExpression(temp.l);
+            temp.r = runExpression(temp.r);
+
+            String result = temp.l.toString() + temp.r.toString();
+
+            Value v = new StringValue(result);
+            
+            return v;
         }
 
         if (exp instanceof ListComprehension) {

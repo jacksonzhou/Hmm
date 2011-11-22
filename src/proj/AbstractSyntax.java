@@ -792,15 +792,48 @@ public class AbstractSyntax {
     	}
 
         public void test(){
-            System.out.println("RECOGNIZED RECOGNIZED");
             System.out.println(dbName);
             System.out.println("-------------");
             System.out.println(this.triple);
-            System.out.println("RECOGNIZED RECOGNIZED");
+            System.out.println("-------------");
+            System.out.println(makeQuery());
+        }
+
+        public String makeQuery(){
+            StringBuilder temp = new StringBuilder();
+
+            temp.append("INSERT INTO " + dbName + " VALUES(");
+            temp.append("'" + triple.subject + "',");
+            temp.append("'" + triple.predicate + "',");
+            temp.append("'" + triple.object + "'");
+            temp.append(")");
+
+            return temp.toString();
+        }
+
+        public void doInsert(Connection c){
+    	    java.sql.Statement stmt = null;
+
+            try{
+    	        stmt = c.createStatement();
+                stmt.executeUpdate(makeQuery());
+                c.commit();
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+            finally{
+                try{
+                    stmt.close();
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
         }
     	
     	public void insertTripleIntoDatabase (Connection c) {
-    		   java.sql.Statement stmt = null;
+    	        java.sql.Statement stmt = null;
     		   
     		   try {
     			   stmt = c.createStatement();
@@ -884,6 +917,7 @@ public class AbstractSyntax {
     	
  	   public void displayDatabase(Connection c) {
    		System.out.println ("dbName " + dbName );
+   		System.out.println ("-------------------");
    	   
  		   String []columnNames = {"Subject", "Relationship", "Object"};//{"Cat_Name", "Relationship", "Other_Cat_Name"};
 		   ResultSet rs = null; // result set object
@@ -1205,6 +1239,26 @@ public class AbstractSyntax {
             }
             
             return new FunctionType(paramTypes, BaseType.OBJECT);
+        }
+    }
+
+    public static class StringCat extends Expression {
+        public Expression l;
+        public Expression r;
+        public StringCat(Expression l, Expression r){
+            this.l = l;
+            this.r = r;
+
+            System.out.println(l);
+            System.out.println(r);
+        }
+        public int getLineNum(){
+            return 1;
+        }
+
+        public void test(){
+            System.out.println(l);
+            System.out.println(r);
         }
     }
 

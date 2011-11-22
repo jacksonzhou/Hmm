@@ -97,37 +97,39 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int DOT = 48;
   /** RegularExpression Id. */
-  int LAMBDA = 49;
+  int CONCAT = 49;
   /** RegularExpression Id. */
-  int MAP_TO = 50;
+  int LAMBDA = 50;
   /** RegularExpression Id. */
-  int CONNECT = 51;
+  int MAP_TO = 51;
   /** RegularExpression Id. */
-  int MYCLASS = 52;
+  int CONNECT = 52;
   /** RegularExpression Id. */
-  int CREATEDATABASE = 53;
+  int MYCLASS = 53;
   /** RegularExpression Id. */
-  int CREATE = 54;
+  int CREATEDATABASE = 54;
   /** RegularExpression Id. */
-  int INSERT = 55;
+  int CREATE = 55;
   /** RegularExpression Id. */
-  int CLOSECONNECTION = 56;
+  int INSERT = 56;
   /** RegularExpression Id. */
-  int DED = 57;
+  int CLOSECONNECTION = 57;
   /** RegularExpression Id. */
-  int SIGN = 58;
+  int DED = 58;
   /** RegularExpression Id. */
-  int SHOWSTACK = 59;
+  int SIGN = 59;
   /** RegularExpression Id. */
-  int INTEGER = 60;
+  int SHOWSTACK = 60;
   /** RegularExpression Id. */
-  int IDENTIFIER = 61;
+  int INTEGER = 61;
   /** RegularExpression Id. */
-  int CLFLOAT = 62;
+  int IDENTIFIER = 62;
   /** RegularExpression Id. */
-  int CLSTRING = 63;
+  int CLFLOAT = 63;
   /** RegularExpression Id. */
-  int ERROR = 64;
+  int CLSTRING = 64;
+  /** RegularExpression Id. */
+  int ERROR = 65;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -183,6 +185,7 @@ public interface ParserConstants {
     "\",\"",
     "\"\\\'\"",
     "\".\"",
+    "\"^\"",
     "\"(\\\\\"",
     "\"->\"",
     "\"Connect\"",

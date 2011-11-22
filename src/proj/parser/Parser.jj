@@ -76,6 +76,7 @@ TOKEN:
   | < COMMA:    "," >
   | < SQUOTE:   "'" >
   | < DOT:      "." >
+  | < CONCAT:      "^" >
   | < LAMBDA:   "(\\">
   | < MAP_TO:   "->">
   | < CONNECT:   "Connect">
@@ -104,6 +105,20 @@ TOKEN:  /* Literals */
 TOKEN:
 {
     <ERROR: ~[] >
+}
+
+StringCat stringCat():
+{Expression l; Expression r;}
+{
+    (l = identifierOrArrayRef() 
+  | l = literal())     
+  
+  <CONCAT>
+
+    (r = identifierOrArrayRef() 
+  | r = literal())     
+
+    { return new StringCat(l,r);}
 }
 
 Triple triple():
@@ -137,7 +152,7 @@ Insert 	insert() :{Token databaseName; Triple myTriple;}
 //database is always a triple with form subject, relationship, object
 DisplayEntireDatabase displayEntireDatabase() :{Token databaseName;}
 {
- <DED>  databaseName = <CLSTRING>
+ <DED>  databaseName = <CLSTRING> <SEMI>
  {return new DisplayEntireDatabase(databaseName.image.toString());}
 }
 
@@ -338,7 +353,7 @@ List<Statement> statements() :
 ShowStack showstack() :
 {Token id;}
 {
-    <SHOWSTACK> id = <CLSTRING> {return new ShowStack(id.image.toString());}
+    <SHOWSTACK> id = <CLSTRING> <SEMI> {return new ShowStack(id.image.toString());}
 }
 
 Statement statement() :
@@ -569,6 +584,7 @@ Expression primary() :
 { Expression e; Token t;}
 {
    LOOKAHEAD(3) e = callOrLambda()    { return e; }
+  | LOOKAHEAD(3) e = stringCat()      { return e; }
   | LOOKAHEAD(3) e = funcArg()	       { return e; } //added by MST - allows a first class function to be passed as an argument, stored in a variable, or returned
   | LOOKAHEAD(3) e = objFunc()     { return e; } //added by MST - allows you to call a method in a class and assign that value to a variable, etc.
   | LOOKAHEAD(2) e = identifierOrArrayRef()         { return e; }
